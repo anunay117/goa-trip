@@ -117,3 +117,20 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
 .fit .fb{padding:16px}.fit h3{margin:8px 0 6px;font-size:1.3rem}
 .pbtn.shop{background:var(--yellow);color:#111;font-size:.82rem;padding:6px 10px;box-shadow:2px 2px 0 #111}
 .grid .tile:nth-child(10){background:var(--yellow)}
+
+/* live expenses */
+.livebar{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700;margin-bottom:12px;flex-wrap:wrap}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#18c964;margin-right:6px;box-shadow:0 0 0 3px rgba(24,201,100,.3)}
+.bal{display:grid;grid-template-columns:90px 1fr auto;gap:8px;align-items:center;padding:8px 0;border-top:2px dashed var(--bd)}
+.bal .pos{color:#0a8f3c}.bal .neg{color:#d12b2b}
+@media(max-width:560px){.bal{grid-template-columns:1fr auto}.bal .muted{grid-column:1/-1;order:3;font-size:.8rem}}
+.dayh{font:800 1rem "Bricolage Grotesque";background:var(--yellow);color:#111;border:2px solid #111;border-radius:8px;display:inline-block;padding:0 10px;margin:12px 0 4px}
+.exp{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:2px dashed var(--bd)}.ex2{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.x{border:2px solid var(--bd);background:var(--card);color:var(--ink);border-radius:8px;width:28px;height:28px;cursor:pointer;font-weight:800}
+.fab{position:fixed;right:16px;bottom:16px;z-index:30;font:800 1.05rem "Bricolage Grotesque";background:var(--lime);color:#111;border:3px solid var(--bd);border-radius:999px;padding:14px 22px;box-shadow:4px 4px 0 var(--bd);cursor:pointer}
+.sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:70;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);color:var(--ink);width:100%;max-width:520px;max-height:92vh;overflow:auto;border:3px solid var(--bd);border-radius:20px 20px 0 0;padding:16px 16px 22px}
+.sheet .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.sheet .mh b{font:800 1.5rem "Bricolage Grotesque";text-transform:uppercase}
+.sheet .mh button{font:800 1rem sans-serif;border:3px solid var(--bd);background:var(--yellow);color:#111;border-radius:10px;padding:2px 10px;cursor:pointer}
+.sheet .lab{font-weight:800;margin:10px 0 6px}.sheet input[type=text],.sheet input[type=number],#codein{width:100%;font:600 1.1rem "Space Grotesk";padding:10px 12px;border:3px solid var(--bd);border-radius:12px;background:var(--card);color:var(--ink)}
+#codein{margin:6px 0 10px}.sheet .chip{margin-bottom:6px}.ferr{color:#d12b2b;font-weight:700;margin:8px 0}

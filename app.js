@@ -57,15 +57,89 @@ ride(){
   '<div class="grid" style="margin-top:14px"><div class="card"><h3>📄 Documents</h3><ul style="margin-left:18px">'+r.docs.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div><div class="card"><h3>🛣️ Road rules</h3><ul style="margin-left:18px">'+r.tips.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div></div></section>';
 },
 budget(){
-  const n=ppl.length,B=TRIP.budget,total=B.reduce((a,b)=>a+b.amount,0);
-  const each=Object.fromEntries(ppl.map(p=>[p.name,0]));
-  B.forEach(b=>{const who=ppl.filter(p=>b.only?b.only.includes(p.name):!(b.exclude||[]).includes(p.name));who.forEach(p=>each[p.name]+=b.amount/who.length)});
-  const cats={};B.forEach(b=>cats[b.cat]=(cats[b.cat]||0)+b.amount);const mx=Math.max(...Object.values(cats),1);
-  const hasPlan=TRIP.planned>0,pct=hasPlan?Math.min(100,total/TRIP.planned*100):0;
-  $('#app').innerHTML=head('The Damage 💸','Split equally, except where noted. UPI ready.')+'<section class="wrap"><div class="grid"><div class="card"><div class="muted">Spent so far</div><div class="big">'+money(total)+'</div>'+(hasPlan?'<div class="bar"><i style="width:'+pct+'%"></i></div><div class="muted" style="margin-top:6px;font-size:.85rem">of '+money(TRIP.planned)+' planned ('+Math.round(pct)+'%)</div>':'<div class="muted" style="font-size:.85rem">across '+B.length+' expenses</div>')+'</div><div class="card"><div class="muted">Each person pays</div>'+ppl.map(p=>'<div style="display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:2px dashed var(--bd)"><span><b>'+esc(p.name)+'</b>'+(B.some(b=>(b.exclude||[]).includes(p.name))?' <span class="muted" style="font-size:.78rem">(own flight)</span>':'')+(B.filter(b=>b.only&&b.only.includes(p.name)&&b.short).map(b=>' <span class="muted" style="font-size:.78rem">(incl. '+esc(b.short)+')</span>').join(''))+'</span><b>'+money(each[p.name])+'</b></div>').join('')+'</div></div>'+
-  '<div class="card" style="margin-top:14px"><h3>By category</h3>'+Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<div style="margin:10px 0"><div style="display:flex;justify-content:space-between"><span>'+esc(k)+'</span><b>'+money(v)+'</b></div><div class="bar"><i style="width:'+v/mx*100+'%"></i></div></div>').join('')+'</div>'+
-  '<div class="card" style="margin-top:14px"><h3>Expenses</h3><div class="tw"><table><tr><th>What</th><th>Category</th><th class="r">Amount</th></tr>'+B.map(b=>'<tr><td>'+esc(b.label)+(b.only?'<div class="muted" style="font-size:.78rem">charged to '+esc(b.only.join(', '))+' only</div>':(b.exclude&&b.exclude.length?'<div class="muted" style="font-size:.78rem">split '+(n-b.exclude.length)+' ways, not '+esc(b.exclude.join(', '))+'</div>':''))+'</td><td>'+esc(b.cat)+'</td><td class="r">'+money(b.amount)+'</td></tr>').join('')+'<tr><td colspan="2"><b>Total</b></td><td class="r"><b>'+money(total)+'</b></td></tr></table></div></div>'+
-  '</section>';
+  const CATS=[['Food','🍽️'],['Drinks','🍹'],['Travel','🚗'],['Stay','🏡'],['Activity','🏄'],['Shopping','🛍️'],['Other','✨']];
+  const catEmoji=Object.fromEntries(CATS);
+  const names=ppl.map(p=>p.name),pre=TRIP.budget||[];
+  const lg=k=>{try{return localStorage.getItem(k)}catch(e){return null}},ls=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+  const local=location.protocol==='file:'||['localhost','127.0.0.1'].includes(location.hostname);
+  const API=((local&&new URLSearchParams(location.search).get('api'))||(TRIP.expenseApi||'')).replace(/\/$/,'');
+  const hm=location.hash.match(/k=([\w-]{6,64})/);if(hm){ls('goa-code',hm[1]);history.replaceState(null,'',location.pathname+location.search)}
+  let code=lg('goa-code')||'',entries=[],queue=[],err='',lastOk=0,me=lg('goa-me')||'',busy=false,modal=false;
+  try{entries=JSON.parse(lg('goa-entries')||'[]')}catch(e){}
+  try{queue=JSON.parse(lg('goa-queue')||'[]')}catch(e){}
+  const saveQ=()=>ls('goa-queue',JSON.stringify(queue));
+  const day=t=>new Date(t).toLocaleDateString('en-IN',{timeZone:'Asia/Kolkata',weekday:'short',day:'numeric',month:'short'});
+  const tm=t=>new Date(t).toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'numeric',minute:'2-digit'});
+  const all=()=>{const ids=new Set(entries.map(e=>e.id));return [...queue.filter(q=>!ids.has(q.id)).map(q=>({...q,pending:true})),...entries].sort((a,b)=>b.ts-a.ts)};
+  const calc=list=>{const net=Object.fromEntries(names.map(n=>[n,0])),paid={...net},share={...net};
+    list.forEach(e=>{const w=(e.split||[]).filter(n=>n in net);if(!w.length||!(e.paid_by in net))return;paid[e.paid_by]+=e.amount;w.forEach(n=>share[n]+=e.amount/w.length)});
+    names.forEach(n=>net[n]=paid[n]-share[n]);return {net,paid,share}};
+  const settle=net=>{const d=names.filter(n=>net[n]<-.5).map(n=>({n,a:-net[n]})).sort((a,b)=>b.a-a.a),c=names.filter(n=>net[n]>.5).map(n=>({n,a:net[n]})).sort((a,b)=>b.a-a.a),out=[];
+    for(let i=0,j=0;i<d.length&&j<c.length;){const m=Math.min(d[i].a,c[j].a);out.push([d[i].n,c[j].n,m]);d[i].a-=m;c[j].a-=m;if(d[i].a<.5)i++;if(c[j].a<.5)j++}return out};
+  const hdr={'Content-Type':'application/json'};
+  const api=(path,opt={})=>fetch(API+path,{...opt,headers:{...hdr,'X-Trip-Code':code,...(opt.headers||{})},cache:'no-store'});
+  const refresh=async()=>{if(!API||!code||busy)return;busy=true;
+    try{
+      for(const q of queue.slice()){const r=await api('/expenses',{method:'POST',body:JSON.stringify(q)});if(r.ok||r.status===400){queue=queue.filter(x=>x.id!==q.id);saveQ()}else if(r.status===401)throw new Error('401')}
+      const r=await api('/expenses');if(r.status===401){code='';ls('goa-code','');err='That trip code was not accepted. Ask Anunay for the right one.';busy=false;return draw()}
+      if(!r.ok)throw new Error(r.status);const d=await r.json();entries=d.entries;ls('goa-entries',JSON.stringify(entries));lastOk=Date.now();err='';
+    }catch(e){err=navigator.onLine===false||/Failed|fetch|Network/i.test(String(e))?'Offline or weak signal. Showing the last saved list; new entries will sync later.':'Could not reach the server, retrying.'}
+    busy=false;if(!modal)draw()};
+  const csv=()=>{const rows=[['Date','Time','Paid by','Amount','Category','What for','Split between']].concat(all().map(e=>[day(e.ts),tm(e.ts),e.paid_by,e.amount,e.category,e.note,(e.split||[]).join(' + ')]));
+    const t=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(t);a.download='goa-trip-expenses.csv';a.click()};
+  const sheet=()=>{const sel=new Set(names);let cat='Food',who=names.includes(me)?me:'';
+    return '<div class="sheetbg" id="sbg"><div class="sheet" role="dialog" aria-label="Add expense"><div class="mh"><b>＋ Add expense</b><button data-a="close">✕</button></div>'+
+    '<p class="lab">Who paid?</p><div id="f-who">'+names.map(n=>'<button class="chip'+(n===who?' on':'')+'" data-a="who" data-v="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div>'+
+    '<p class="lab">Amount (₹)</p><input id="f-amt" type="number" inputmode="decimal" min="1" step="any" placeholder="e.g. 850" autocomplete="off">'+
+    '<p class="lab">Category</p><div id="f-cat">'+CATS.map(([c,e])=>'<button class="chip'+(c===cat?' on':'')+'" data-a="cat" data-v="'+c+'">'+e+' '+c+'</button>').join('')+'</div>'+
+    '<p class="lab">What for? (optional)</p><input id="f-note" type="text" maxlength="80" placeholder="Dinner at the shack" autocomplete="off">'+
+    '<p class="lab">Split between <span class="muted" style="font-weight:600">(everyone by default)</span></p><div id="f-split">'+names.map(n=>'<button class="chip on" data-a="sp" data-v="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div>'+
+    '<div style="margin:6px 0 12px"><button class="chip" data-a="spall">Everyone</button><button class="chip" data-a="spme">Just the payer</button></div>'+
+    '<p id="f-err" class="ferr"></p><button class="btn2" id="f-save" data-a="save">Save expense</button></div></div>'};
+  const draw=()=>{
+    if(!API){$('#app').innerHTML=head('The Damage 💸','Live expense tracker')+'<section class="wrap"><div class="card"><h3>Live tracking is not connected yet</h3><p class="muted">Pre-trip costs are below. The live tracker turns on once the server is set up.</p></div>'+preHtml()+'</section>';return}
+    if(!code){$('#app').innerHTML=head('The Damage 💸','Everyone logs spends here. Totals update live.')+'<section class="wrap"><div class="card"><h3>🔐 Enter the trip code</h3><p class="muted" style="margin-bottom:10px">Ask Anunay for the code, or open the special link they shared and it will fill in automatically.</p>'+(err?'<p class="ferr">'+esc(err)+'</p>':'')+'<input id="codein" type="password" placeholder="Trip code" autocomplete="off"><button class="btn2" data-a="code">Unlock</button></div>'+preHtml()+'</section>';return}
+    const list=all(),{net,paid,share}=calc(list),total=list.reduce((a,e)=>a+e.amount,0);
+    const today=day(Date.now()),todayTotal=list.filter(e=>day(e.ts)===today).reduce((a,e)=>a+e.amount,0);
+    const cats={};list.forEach(e=>cats[e.category]=(cats[e.category]||0)+e.amount);const mx=Math.max(...Object.values(cats),1);
+    const groups={};list.forEach(e=>{(groups[day(e.ts)]=groups[day(e.ts)]||[]).push(e)});
+    const st=settle(net),sc=err?'⚠️ '+esc(err):'<span class="dot"></span> Live · updated '+(lastOk?tm(lastOk):'now');
+    $('#app').innerHTML=head('The Damage 💸','Log every spend. Totals and balances update for everyone.')+'<section class="wrap">'+
+    '<div class="livebar">'+sc+'<button class="chip" data-a="refresh">↻ Refresh</button></div>'+
+    '<div class="grid"><div class="card"><div class="muted">Spent on the trip</div><div class="big">'+money(total)+'</div><div class="muted" style="font-size:.85rem">'+list.length+' expense'+(list.length===1?'':'s')+' logged</div></div>'+
+    '<div class="card"><div class="muted">Today</div><div class="big">'+money(todayTotal)+'</div><div class="muted" style="font-size:.85rem">'+esc(today)+'</div></div></div>'+
+    '<div class="card" style="margin-top:16px"><h3>👥 Everyone\'s balance</h3><p class="muted" style="font-size:.82rem;margin-bottom:6px">Share = what each person owes of the logged spends. Net = paid minus share.</p>'+
+    names.map(n=>{const v=Math.round(net[n]);return '<div class="bal"><b>'+esc(n)+'</b><span class="muted">paid '+money(paid[n])+' · share '+money(share[n])+'</span><b class="'+(v>0?'pos':v<0?'neg':'')+'">'+(v>0?'gets back '+money(v):v<0?'owes '+money(-v):'all square')+'</b></div>'}).join('')+
+    (st.length?'<details style="margin-top:10px"><summary>💸 Who pays whom (fewest transfers)</summary><ul style="margin:8px 0 0 18px">'+st.map(s=>'<li><b>'+esc(s[0])+'</b> pays <b>'+esc(s[1])+'</b> '+money(s[2])+'</li>').join('')+'</ul></details>':'')+'</div>'+
+    (Object.keys(cats).length?'<div class="card" style="margin-top:16px"><h3>By category</h3>'+Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<div style="margin:10px 0"><div style="display:flex;justify-content:space-between"><span>'+(catEmoji[k]||'')+' '+esc(k)+'</span><b>'+money(v)+'</b></div><div class="bar"><i style="width:'+v/mx*100+'%"></i></div></div>').join('')+'</div>':'')+
+    '<div class="card" style="margin-top:16px"><h3>🧾 Expenses</h3>'+(list.length?Object.entries(groups).map(([d,es])=>'<div class="dayh">'+esc(d)+' · '+money(es.reduce((a,e)=>a+e.amount,0))+'</div>'+es.map(e=>'<div class="exp"><div class="ex1"><b>'+(catEmoji[e.category]||'✨')+' '+esc(e.note||e.category)+'</b>'+(e.pending?' <span class="tag">⏳ syncing</span>':'')+'<div class="muted" style="font-size:.8rem">'+esc(e.paid_by)+' paid · '+tm(e.ts)+' · split '+((e.split||[]).length===names.length?'everyone':(e.split||[]).map(esc).join(', '))+'</div></div><div class="ex2"><b>'+money(e.amount)+'</b>'+(e.pending?'':'<button class="x" data-a="del" data-id="'+esc(e.id)+'" aria-label="Delete">✕</button>')+'</div></div>').join('')).join(''):'<p class="muted">Nothing logged yet. Tap <b>＋ Add expense</b> after the first spend.</p>')+'</div>'+
+    preHtml()+
+    '<p style="margin-top:14px"><button class="chip" data-a="csv">⬇️ Download CSV</button> <button class="chip" data-a="lock">🔒 Forget code on this phone</button></p></section>'+
+    '<button class="fab" data-a="open">＋ Add expense</button>'};
+  const preHtml=()=>{if(!pre.length)return '';const t=pre.reduce((a,b)=>a+b.amount,0);return '<div class="card" style="margin-top:16px"><h3>🧳 Pre-trip costs</h3><p class="muted" style="font-size:.82rem;margin-bottom:6px">Already paid before the trip, so not part of the live balances.</p><div class="tw"><table><tr><th>What</th><th class="r">Amount</th></tr>'+pre.map(b=>'<tr><td>'+esc(b.label)+(b.only?'<div class="muted" style="font-size:.78rem">charged to '+esc(b.only.join(', '))+' only</div>':(b.exclude&&b.exclude.length?'<div class="muted" style="font-size:.78rem">split '+(names.length-b.exclude.length)+' ways, not '+esc(b.exclude.join(', '))+'</div>':''))+'</td><td class="r">'+money(b.amount)+'</td></tr>').join('')+'<tr><td><b>Total</b></td><td class="r"><b>'+money(t)+'</b></td></tr></table></div></div>'};
+  const open=()=>{modal=true;document.body.insertAdjacentHTML('beforeend',sheet());document.body.style.overflow='hidden';const a=document.getElementById('f-amt');a&&a.focus()};
+  const close=()=>{modal=false;const s=document.getElementById('sbg');s&&s.remove();document.body.style.overflow='';draw()};
+  const uid=()=>(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2));
+  document.addEventListener('click',async e=>{
+    const b=e.target.closest('[data-a]');const bg=e.target.id==='sbg';if(bg){close();return}if(!b)return;const a=b.dataset.a;
+    if(a==='open')open();else if(a==='close')close();
+    else if(a==='who'){document.querySelectorAll('#f-who .chip').forEach(c=>c.classList.toggle('on',c===b))}
+    else if(a==='cat'){document.querySelectorAll('#f-cat .chip').forEach(c=>c.classList.toggle('on',c===b))}
+    else if(a==='sp'){b.classList.toggle('on')}
+    else if(a==='spall'){document.querySelectorAll('#f-split .chip').forEach(c=>c.classList.add('on'))}
+    else if(a==='spme'){const w=document.querySelector('#f-who .chip.on');document.querySelectorAll('#f-split .chip').forEach(c=>c.classList.toggle('on',!!w&&c.dataset.v===w.dataset.v))}
+    else if(a==='save'){
+      const who=(document.querySelector('#f-who .chip.on')||{dataset:{}}).dataset.v,amt=parseFloat(document.getElementById('f-amt').value),cat=(document.querySelector('#f-cat .chip.on')||{dataset:{}}).dataset.v||'Other',note=document.getElementById('f-note').value.trim(),sp=[...document.querySelectorAll('#f-split .chip.on')].map(c=>c.dataset.v),er=document.getElementById('f-err');
+      if(!who){er.textContent='Pick who paid.';return}if(!(amt>0)){er.textContent='Enter an amount.';return}if(!sp.length){er.textContent='Pick at least one person to split with.';return}
+      me=who;ls('goa-me',me);queue.push({id:uid(),ts:Date.now(),paid_by:who,amount:Math.round(amt*100)/100,category:cat,note,split:sp,added_by:who});saveQ();close();refresh()}
+    else if(a==='del'){if(confirm('Delete this expense for everyone?')){entries=entries.filter(x=>x.id!==b.dataset.id);draw();try{await api('/expenses/'+encodeURIComponent(b.dataset.id),{method:'DELETE'})}catch(x){}refresh()}}
+    else if(a==='code'){const v=document.getElementById('codein').value.trim();if(v){code=v;ls('goa-code',v);err='';draw();refresh()}}
+    else if(a==='lock'){if(confirm('Forget the trip code on this phone?')){code='';ls('goa-code','');entries=[];ls('goa-entries','[]');draw()}}
+    else if(a==='refresh')refresh();else if(a==='csv')csv()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal)close()});
+  window.addEventListener('hashchange',()=>{const m=location.hash.match(/k=([\w-]{6,64})/);if(m){code=m[1];ls('goa-code',code);err='';history.replaceState(null,'',location.pathname+location.search);draw();refresh()}});
+  draw();
+  if(API&&code){refresh();setInterval(()=>{if(!document.hidden&&!modal)refresh()},8000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});window.addEventListener('online',refresh)}
 },
 outfits(){
   const O=TRIP.outfits,ph=id=>'https://images.pexels.com/photos/'+id+'/pexels-photo-'+id+'.jpeg?auto=compress&cs=tinysrgb&w=700';
