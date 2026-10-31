@@ -128,6 +128,71 @@ const TRIP = {
       yt: "PLJtpjlkBVF4wneUJqC9SZPhBiEBQmmEsi", ytName: "Top Hindi Rap Songs of All Time" }
   ],
 
+  // Fit Check page (outfit ideas). Photos are free Pexels stock photos (id = Pexels photo id); shop links are Myntra category pages and search links.
+  outfits: {
+    intro: "Goa in early December is hot in the day (about 32°C) and mild at night (about 21°C). Think light cotton, linen and flowy fabrics, plus covered-up beachwear that still looks good.",
+    ideas: [
+      { title: "Travel-day kurta set", emoji: "✈️", when: "Day 1: the 05:00 flight and arrival", photo: 36311379,
+        why: "Breathable cotton, easy to move in, and still looks put-together when you land at 07:35.",
+        tips: "Pair with palazzos or leggings and keep the dupatta handy as a scarf for the cold flight.",
+        shop: [{ label: "Kurta sets on Myntra", url: "https://www.myntra.com/kurta-sets" }, { label: "Palazzos", url: "https://www.myntra.com/palazzos" }] },
+      { title: "Flowy white maxi", emoji: "🌊", when: "Beach walks and sunsets", photo: 9783413,
+        why: "Covers you up, catches the sea breeze and photographs beautifully at golden hour.",
+        tips: "Pick light colours or pastels, a full-length cotton or rayon blend, and wear shorts underneath for windy beaches.",
+        shop: [{ label: "Maxi dresses on Myntra", url: "https://www.myntra.com/maxi-dresses" }] },
+      { title: "Shirt dress + sun hat", emoji: "👒", when: "Cafes, markets and Fort Aguada", photo: 19684582,
+        why: "A button-up linen or cotton shirt dress is cool, modest and works for both sightseeing and lunch.",
+        tips: "Add sunglasses and a wide-brim hat, and wear comfy sandals for the walking.",
+        shop: [{ label: "Shirt dresses", url: "https://www.myntra.com/shirt-dress" }, { label: "Sun hats", url: "https://www.myntra.com/sun-hat" }] },
+      { title: "Breezy kaftan", emoji: "🌴", when: "Beach shack lunch and cover-up", photo: 7292974,
+        why: "Loose, full-length and super comfortable. Easy to throw over your swim set and walk straight to lunch.",
+        tips: "Choose one in cotton or viscose, and skip heavy embroidery in the heat.",
+        shop: [{ label: "Kaftans on Myntra", url: "https://www.myntra.com/kaftan" }] },
+      { title: "Swim in a long dress or a modest swim set", emoji: "🏊‍♀️", when: "Sea and pool time", photo: 17437768,
+        why: "No bikinis needed. A swim dress with shorts, or a rash guard with swim leggings, covers you fully and dries fast.",
+        tips: "Choose dark or print colours, quick-dry fabric, and pack a second set so you always have a dry one. A cotton long dress over it works for wading in.",
+        shop: [{ label: "Swim dresses", url: "https://www.myntra.com/swim-dress" }, { label: "Rash guards", url: "https://www.myntra.com/women-rash-guard" }, { label: "Swim dress + shorts (Amazon)", url: "https://www.amazon.in/s?k=women+swim+dress+with+shorts" }] },
+      { title: "Co-ord set", emoji: "🧺", when: "Sightseeing and travel back", photo: 18665107,
+        why: "A matching top and palazzo or trousers is the easiest outfit in your bag: one piece, no thinking.",
+        tips: "Linen or cotton co-ords are comfortable on the 22:30 flight home too.",
+        shop: [{ label: "Co-ords on Myntra", url: "https://www.myntra.com/co-ords" }, { label: "Palazzos", url: "https://www.myntra.com/palazzos" }] },
+      { title: "Statement party maxi", emoji: "💃", when: "Beach club and night out", photo: 28488718,
+        why: "One standout tiered dress is all you need for a night. It is covered, it moves well and it looks great in sunset photos.",
+        tips: "Carry a light shrug for the breeze, and flats or wedges instead of heels on sand.",
+        shop: [{ label: "Maxi dresses on Myntra", url: "https://www.myntra.com/maxi-dresses" }] },
+      { title: "White jumpsuit", emoji: "🤍", when: "Dinner and evening", photo: 2699250,
+        why: "Easy to dress up or down, comfortable and fully covered. Looks smart in the evening and stays cool.",
+        tips: "A full-length one is more flattering with sandals, and a belt keeps it from looking shapeless.",
+        shop: [{ label: "Jumpsuits on Myntra", url: "https://www.myntra.com/jumpsuit" }] },
+      { title: "Modest midi for churches", emoji: "⛪", when: "Day 4: Old Goa churches", photo: 20544951,
+        why: "Goa's old churches expect covered shoulders and knees, and a cotton midi or kurta handles that without being hot.",
+        tips: "Carry a stole or dupatta so you can cover up quickly, and wear shoes that are easy to slip off at the entrance.",
+        shop: [{ label: "Midi dresses", url: "https://www.myntra.com/midi-dresses" }, { label: "Kurta sets", url: "https://www.myntra.com/kurta-sets" }] }
+    ],
+    plan: [
+      { day: "Day 1 (Thu 3 Dec)", looks: "Kurta set for the flight, then a flowy maxi for the sunset." },
+      { day: "Day 2 (Fri 4 Dec)", looks: "Shirt dress and hat for the day, swim dress for the sea, jumpsuit for dinner." },
+      { day: "Day 3 (Sat 5 Dec)", looks: "Kaftan for lunch, co-ord for exploring, party maxi for the night." },
+      { day: "Day 4 (Sun 6 Dec)", looks: "Modest midi or kurta for the churches, co-ord for the flight home." }
+    ],
+    tips: [
+      "Pack 6 to 8 light pieces, not 20. Mix and match, and repeat with different accessories.",
+      "Cotton, linen, rayon and muslin beat polyester and heavy denim in this heat.",
+      "Pale colours stay cooler. Use dark prints for swimwear so wet patches don't show.",
+      "Footwear: slides or flip-flops, flat sandals and one pair of sneakers. Skip heels on sand.",
+      "Bring a stole or dupatta, a big tote, a hat, sunglasses and a quick-dry towel.",
+      "Pack a small laundry bag for wet clothes, and a safety pin or two for windy-dress emergencies."
+    ],
+    inspo: [
+      { label: "Pinterest: Goa outfits for women", url: "https://in.pinterest.com/search/pins/?q=goa%20outfits%20for%20women" },
+      { label: "Pinterest: modest beach outfits India", url: "https://in.pinterest.com/search/pins/?q=modest%20beach%20outfits%20india" },
+      { label: "Pinterest: Goa vacation outfit ideas", url: "https://in.pinterest.com/search/pins/?q=goa%20vacation%20outfit%20ideas" },
+      { label: "Instagram: #goaoutfits", url: "https://www.instagram.com/explore/tags/goaoutfits/" },
+      { label: "Instagram: #goavibes", url: "https://www.instagram.com/explore/tags/goavibes/" }
+    ],
+    boys: "Boys are too smart, they don't need suggestions. 😎"
+  },
+
   photos: [                       // drop images in the photos/ folder, then list them here
     // { src: "photos/beach.jpg", caption: "Sunset at Vagator" },
   ]

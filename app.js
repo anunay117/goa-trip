@@ -4,12 +4,12 @@ const money=n=>TRIP.currency+Math.round(n).toLocaleString('en-IN');
 const parse=d=>new Date(d+'T00:00:00');
 const fmt=(d,o)=>d.toLocaleDateString('en-IN',o||{weekday:'short',day:'numeric',month:'short'});
 const ppl=TRIP.crew.filter(c=>!c.infant);
-const PAGES=[['index.html','Home','home'],['itinerary.html','The Plan','itinerary'],['crew.html','The Squad','crew'],['stay.html','The Crib','stay'],['ride.html','The Whip','ride'],['budget.html','The Damage','budget'],['playlists.html','Aux Cord','playlists'],['imposter.html','Imposter','imposter'],['gallery.html','Core Memories','gallery']];
+const PAGES=[['index.html','Home','home'],['itinerary.html','The Plan','itinerary'],['crew.html','The Squad','crew'],['stay.html','The Crib','stay'],['ride.html','The Whip','ride'],['budget.html','The Damage','budget'],['outfits.html','Fit Check','outfits'],['playlists.html','Aux Cord','playlists'],['imposter.html','Imposter','imposter'],['gallery.html','Core Memories','gallery']];
 const page=document.body.dataset.page;
 document.title=(page==='home'?'':PAGES.find(p=>p[2]===page)[1]+' | ')+TRIP.name;
 document.body.insertAdjacentHTML('afterbegin','<nav><div class="wrap"><a class="logo" href="index.html">🌴 '+esc(TRIP.name)+'</a>'+PAGES.map(p=>'<a class="l'+(p[2]===page?' on':'')+'" href="'+p[0]+'">'+p[1]+'</a>').join('')+'<button class="mbtn" id="mbtn" aria-expanded="false" aria-controls="menu">☰ Menu</button></div></nav><div class="mq"><div>'+Array(8).join('<span>'+esc(TRIP.name)+' ✦ '+ppl.length+' BESTIES ✦ NO CAP ✦ OUT OF OFFICE ✦ </span>')+Array(8).join('<span>'+esc(TRIP.name)+' ✦ '+ppl.length+' BESTIES ✦ NO CAP ✦ OUT OF OFFICE ✦ </span>')+'</div></div>');
 document.body.insertAdjacentHTML('beforeend','<footer>Made with ☀️ and zero sleep by the squad · '+esc(TRIP.name)+'</footer>');
-const MEM={playlists:'🎧',home:'🏠',itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',imposter:'🕵️',playlists:'🎧',gallery:'📸'};
+const MEM={outfits:'👗',playlists:'🎧',home:'🏠',itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',imposter:'🕵️',playlists:'🎧',gallery:'📸'};
 document.body.insertAdjacentHTML('beforeend','<div id="menu" class="menu" role="dialog" aria-label="Site menu"><div class="panel"><div class="mh"><b>Where to?</b><button id="mclose">✕ Close</button></div><div class="mg">'+PAGES.map(p=>'<a href="'+p[0]+'" class="'+(p[2]===page?'cur':'')+'"><span>'+(MEM[p[2]]||'•')+'</span>'+p[1]+(p[2]===page?'<small>you are here</small>':'')+'</a>').join('')+'</div></div></div>');
 (function(){const m=document.getElementById('menu'),b=document.getElementById('mbtn');
   const set=o=>{m.classList.toggle('on',o);b.setAttribute('aria-expanded',o);document.body.style.overflow=o?'hidden':''};
@@ -25,7 +25,7 @@ const plCard=p=>'<div class="card pl"><div class="ple">'+p.emoji+'</div><h3>'+es
 const R={
 home(){
   const s=parse(TRIP.start),e=parse(TRIP.end),w=TRIP.weather;
-  const em={itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',playlists:'🎧',imposter:'🕵️',gallery:'📸'};
+  const em={itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',outfits:'👗',playlists:'🎧',imposter:'🕵️',gallery:'📸'};
   const tiles=PAGES.slice(1).map(p=>'<a class="card tile" href="'+p[0]+'"><div class="e">'+(em[p[2]]||'•')+'</div><h3>'+p[1]+'</h3></a>').join('');
   let pk=[];try{pk=JSON.parse(localStorage.getItem('goa-pack2')||'[]')}catch(x){}
   const groups=TRIP.packing.map(g=>'<div class="card check"><h3>'+g.emoji+' '+esc(g.group)+'</h3>'+g.items.map(x=>'<label><input type="checkbox" data-n="'+esc(x)+'" '+(pk.includes(x)?'checked':'')+'> '+esc(x)+'</label>').join('')+'</div>').join('');
@@ -66,6 +66,18 @@ budget(){
   '<div class="card" style="margin-top:14px"><h3>By category</h3>'+Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<div style="margin:10px 0"><div style="display:flex;justify-content:space-between"><span>'+esc(k)+'</span><b>'+money(v)+'</b></div><div class="bar"><i style="width:'+v/mx*100+'%"></i></div></div>').join('')+'</div>'+
   '<div class="card" style="margin-top:14px"><h3>Expenses</h3><div class="tw"><table><tr><th>What</th><th>Category</th><th class="r">Amount</th></tr>'+B.map(b=>'<tr><td>'+esc(b.label)+(b.only?'<div class="muted" style="font-size:.78rem">charged to '+esc(b.only.join(', '))+' only</div>':(b.exclude&&b.exclude.length?'<div class="muted" style="font-size:.78rem">split '+(n-b.exclude.length)+' ways, not '+esc(b.exclude.join(', '))+'</div>':''))+'</td><td>'+esc(b.cat)+'</td><td class="r">'+money(b.amount)+'</td></tr>').join('')+'<tr><td colspan="2"><b>Total</b></td><td class="r"><b>'+money(total)+'</b></td></tr></table></div></div>'+
   '</section>';
+},
+outfits(){
+  const O=TRIP.outfits,ph=id=>'https://images.pexels.com/photos/'+id+'/pexels-photo-'+id+'.jpeg?auto=compress&cs=tinysrgb&w=700';
+  const girls=ppl.filter(p=>['Shruti','Akriti','Sarvpriya'].includes(p.name)).map(p=>p.name);
+  $('#app').innerHTML=head('Fit Check 👗','What to wear in Goa: easy, covered-up and Instagram-ready.')+'<section class="wrap">'+
+  '<div class="card" style="background:var(--yellow);color:#111"><h3>☀️ The vibe</h3><p>'+esc(O.intro)+'</p>'+(girls.length?'<p style="margin-top:8px"><b>For the girls:</b> '+esc(girls.join(', '))+'. Every look below is Indian-travel friendly: no bikinis, nothing too short, nothing you will need to keep adjusting.</p>':'')+'</div>'+
+  '<h2 style="margin:26px 0 4px">🗓️ Day-by-day</h2><div class="card">'+O.plan.map(p=>'<div class="it" style="grid-template-columns:130px 1fr"><time style="font-size:.85rem">'+esc(p.day)+'</time><div>'+esc(p.looks)+'</div></div>').join('')+'<p class="muted" style="font-size:.8rem;margin-top:8px">Matches the sample itinerary, so tweak it if your plans change.</p></div>'+
+  '<h2 style="margin:26px 0 4px">👗 Outfit ideas</h2><div class="fitgrid">'+O.ideas.map(i=>'<div class="card fit"><a class="fph" href="https://www.pexels.com/photo/'+i.photo+'/" target="_blank" rel="noopener"><img loading="lazy" src="'+ph(i.photo)+'" alt="'+esc(i.title)+'" onerror="this.parentNode.style.display=\'none\'"></a><div class="fb"><span class="tag">'+esc(i.when)+'</span><h3>'+i.emoji+' '+esc(i.title)+'</h3><p>'+esc(i.why)+'</p><p class="muted" style="margin-top:6px"><b>Tip:</b> '+esc(i.tips)+'</p><div class="pbtns" style="margin-top:10px">'+i.shop.map(l=>'<a class="pbtn shop" href="'+esc(l.url)+'" target="_blank" rel="noopener">🛍️ '+esc(l.label)+'</a>').join('')+'</div></div></div>').join('')+'</div>'+
+  '<div class="card" style="margin-top:22px"><h3>🧳 Quick rules</h3><ul style="margin-left:18px">'+O.tips.map(t=>'<li style="margin:4px 0">'+esc(t)+'</li>').join('')+'</ul></div>'+
+  '<div class="card" style="margin-top:18px"><h3>📌 More inspo</h3><p class="muted" style="margin-bottom:8px">Search pages on Pinterest and Instagram. They may ask you to sign in.</p><div class="pbtns">'+O.inspo.map(l=>'<a class="pbtn" style="background:var(--lime);color:#111" href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+'</a>').join('')+'</div></div>'+
+  '<div class="card" style="margin-top:18px;background:#111;color:#fff"><h3 style="color:var(--lime)">👨 And the boys?</h3><p style="font-size:1.15rem;font-weight:700">'+esc(O.boys)+'</p></div>'+
+  '<p class="muted" style="font-size:.8rem;margin-top:16px">Photos: free stock images from <a href="https://www.pexels.com" target="_blank" rel="noopener">Pexels</a> (tap a photo for its page). Shop buttons open Myntra and Amazon categories, not specific products, so prices and availability are whatever the shops show.</p></section>';
 },
 playlists(){
   $('#app').innerHTML=head('Aux Cord 🎧','Whoever drives controls the vibe. Pick one.')+'<section class="wrap"><div class="plgrid">'+TRIP.playlists.map(plCard).join('')+'</div><p class="muted" style="font-size:.85rem;margin-top:18px">These are public playlists made by other people on Spotify and YouTube, so their songs can change over time. You may need to sign in to play full tracks. YouTube Music plays the playlist\'s music videos.</p></section>';
