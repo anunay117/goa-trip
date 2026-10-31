@@ -2,7 +2,7 @@
 // Items marked (SAMPLE) are placeholders. Replace them with the real details.
 const TRIP = {
   name: "Goa Trip 2026",
-  tagline: "6 friends. 1 villa. Zero plans (okay, a few plans).",
+  tagline: "6 besties. 1 villa. 0 braincells. It's giving Goa 🌴",
   start: "2026-12-03",            // first day, YYYY-MM-DD
   end: "2026-12-06",              // last day
   from: "Home",                   // where everyone starts
@@ -85,7 +85,17 @@ const TRIP = {
   ],
   planned: 90000,                 // total budget you aim for, for the whole group
 
-  packing: ["Sunscreen", "Swimwear", "Sunglasses", "Power bank", "ID & licence", "Cash & UPI ready", "Flip-flops", "Light jacket for nights", "Chargers", "Waterproof pouch"],
+  // Goa in early December: dry & sunny, hot days, mild nights, warm sea (averages, sources vary by 1-2 degrees)
+  weather: { hi: "32°C", lo: "21°C", sea: "28°C", rain: "~0-1 days", sun: "~10 hrs", note: "Dry season and peak tourist season, so book dinner spots early. Check the 3-day forecast before you leave." },
+
+  packing: [
+    { group: "Docs & money", emoji: "🪪", items: ["Flight ticket (offline copy)", "Photo ID (Aadhaar / passport)", "Driving licence (original, for the car)", "Villa booking confirmation", "UPI set up + some cash for shacks, parking and tips", "Card / forex if needed"] },
+    { group: "Sun & skin (UV is brutal)", emoji: "🧴", items: ["Sunscreen SPF 50+ (reef-safe if possible)", "Sunglasses", "Cap or hat", "Aloe vera gel for sunburn", "Lip balm with SPF", "Mosquito repellent (evenings near water)", "ORS / electrolyte sachets"] },
+    { group: "Beach & pool", emoji: "🏖️", items: ["Swimwear x2 (one to dry)", "Quick-dry towel", "Flip-flops / slides", "Waterproof phone pouch", "Beach bag", "Rash guard if you burn easily"] },
+    { group: "Clothes (light & breathable)", emoji: "👕", items: ["Cotton / linen tees and shorts", "1-2 going-out fits for the nights", "Light shirt or thin hoodie (nights ~21°C, breezy on bikes)", "Sneakers or sandals for walking forts and old town", "Sleepwear + enough underwear and socks", "Small laundry bag for wet clothes"] },
+    { group: "Tech & misc", emoji: "🔌", items: ["Power bank", "Phone charger + spare cable", "Bluetooth speaker", "Earphones", "Basic meds (paracetamol, antacid, stomach-upset tablets)", "Hand sanitiser and wet wipes"] }
+  ],
+  skip: ["Heavy jacket or sweater", "Umbrella or raincoat (monsoon is long gone)", "Jeans for every day (too hot and slow to dry)"],
 
   photos: [                       // drop images in the photos/ folder, then list them here
     // { src: "photos/beach.jpg", caption: "Sunset at Vagator" },
