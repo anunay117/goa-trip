@@ -39,7 +39,7 @@ crew(){
 },
 stay(){
   const s=TRIP.stay;
-  $('#app').innerHTML=head('The Crib 🏡','Home base for '+nights+' nights. It\'s giving villa.')+'<section class="wrap"><div class="card"><h2>'+esc(s.name)+'</h2><p class="muted" style="margin-bottom:14px">'+esc(s.address)+'</p><dl class="kv"><dt>Check-in</dt><dd>'+esc(s.checkIn)+'</dd><dt>Check-out</dt><dd>'+esc(s.checkOut)+'</dd><dt>Rooms</dt><dd>'+s.bedrooms+' bedrooms · '+esc(s.beds)+'</dd><dt>Host</dt><dd>'+esc(s.host)+(s.hostPhone?' · <a href="tel:'+esc(s.hostPhone)+'">'+esc(s.hostPhone)+'</a>':'')+'</dd><dt>Wi-Fi</dt><dd>'+esc(s.wifi)+'</dd><dt>Cost</dt><dd>'+money(s.pricePerNight*s.nights)+' ('+money(s.pricePerNight)+' × '+s.nights+' nights) · <b>'+money(s.pricePerNight*s.nights/ppl.length)+' each</b></dd></dl><p style="margin-top:14px"><a href="'+esc(s.mapLink)+'" target="_blank" rel="noopener">📍 Open in Maps</a> · <a href="'+esc(s.link)+'" target="_blank" rel="noopener">View listing</a></p></div>'+
+  $('#app').innerHTML=head('The Crib 🏡','Home base for '+nights+' nights. It\'s giving villa.')+'<section class="wrap"><div class="card"><h2>'+esc(s.name)+'</h2><p class="muted" style="margin-bottom:14px">'+esc(s.address)+'</p><dl class="kv"><dt>Check-in</dt><dd>'+esc(s.checkIn)+'</dd><dt>Check-out</dt><dd>'+esc(s.checkOut)+'</dd><dt>Rooms</dt><dd>'+s.bedrooms+' bedrooms · '+esc(s.beds)+'</dd><dt>Host</dt><dd>'+esc(s.host)+(s.hostPhone?' · <a href="tel:'+esc(s.hostPhone)+'">'+esc(s.hostPhone)+'</a>':'')+'</dd><dt>Wi-Fi</dt><dd>'+esc(s.wifi)+'</dd><dt>Cost</dt><dd>'+money(s.totalCost)+' for '+s.nights+' nights · <b>'+money(s.totalCost/ppl.length)+' each</b></dd></dl><p style="margin-top:14px"><a href="'+esc(s.mapLink)+'" target="_blank" rel="noopener">📍 Open in Maps</a> · <a href="'+esc(s.link)+'" target="_blank" rel="noopener">View listing</a></p></div>'+
   '<div class="grid" style="margin-top:14px"><div class="card"><h3>✨ Perks</h3><ul style="margin-left:18px">'+s.perks.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div><div class="card"><h3>📜 House rules</h3><ul style="margin-left:18px">'+s.rules.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div></div></section>';
 },
 ride(){
@@ -48,17 +48,13 @@ ride(){
   '<div class="grid" style="margin-top:14px"><div class="card"><h3>📄 Documents</h3><ul style="margin-left:18px">'+r.docs.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div><div class="card"><h3>🛣️ Road rules</h3><ul style="margin-left:18px">'+r.tips.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div></div></section>';
 },
 budget(){
-  const n=ppl.length,names=ppl.map(c=>c.name),B=TRIP.budget,total=B.reduce((a,b)=>a+b.amount,0),share=total/n;
-  const bal=Object.fromEntries(names.map(x=>[x,0]));B.forEach(b=>{if(b.paidBy in bal)bal[b.paidBy]+=b.amount});names.forEach(x=>bal[x]-=share);
-  const debt=names.filter(x=>bal[x]<-0.5).map(x=>({n:x,a:-bal[x]})),cred=names.filter(x=>bal[x]>0.5).map(x=>({n:x,a:bal[x]})),pay=[];
-  debt.sort((a,b)=>b.a-a.a);cred.sort((a,b)=>b.a-a.a);
-  for(let i=0,j=0;i<debt.length&&j<cred.length;){const m=Math.min(debt[i].a,cred[j].a);pay.push([debt[i].n,cred[j].n,m]);debt[i].a-=m;cred[j].a-=m;if(debt[i].a<.5)i++;if(cred[j].a<.5)j++}
+  const n=ppl.length,B=TRIP.budget,total=B.reduce((a,b)=>a+b.amount,0),share=total/n;
   const cats={};B.forEach(b=>cats[b.cat]=(cats[b.cat]||0)+b.amount);const mx=Math.max(...Object.values(cats),1);
   const pct=Math.min(100,total/TRIP.planned*100);
   $('#app').innerHTML=head('The Damage 💸','Split equally across '+n+' of us. UPI ready.')+'<section class="wrap"><div class="grid"><div class="card"><div class="muted">Spent so far</div><div class="big">'+money(total)+'</div><div class="bar"><i style="width:'+pct+'%"></i></div><div class="muted" style="margin-top:6px;font-size:.85rem">of '+money(TRIP.planned)+' planned ('+Math.round(pct)+'%)</div></div><div class="card"><div class="muted">Each person\'s share</div><div class="big">'+money(share)+'</div><div class="muted" style="font-size:.85rem">Budget per head: '+money(TRIP.planned/n)+'</div></div></div>'+
   '<div class="card" style="margin-top:14px"><h3>By category</h3>'+Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<div style="margin:10px 0"><div style="display:flex;justify-content:space-between"><span>'+esc(k)+'</span><b>'+money(v)+'</b></div><div class="bar"><i style="width:'+v/mx*100+'%"></i></div></div>').join('')+'</div>'+
-  '<div class="card" style="margin-top:14px"><h3>Expenses</h3><div class="tw"><table><tr><th>What</th><th>Category</th><th>Paid by</th><th class="r">Amount</th></tr>'+B.map(b=>'<tr><td>'+esc(b.label)+'</td><td>'+esc(b.cat)+'</td><td>'+esc(b.paidBy)+'</td><td class="r">'+money(b.amount)+'</td></tr>').join('')+'<tr><td colspan="3"><b>Total</b></td><td class="r"><b>'+money(total)+'</b></td></tr></table></div></div>'+
-  '<div class="card" style="margin-top:14px"><h3>💸 Who pays whom</h3>'+(pay.length?'<ul style="margin-left:18px">'+pay.map(p=>'<li><b>'+esc(p[0])+'</b> pays <b>'+esc(p[1])+'</b> '+money(p[2])+'</li>').join('')+'</ul>':'<p class="muted">All settled up.</p>')+'<p class="muted" style="font-size:.8rem;margin-top:8px">Fewest transfers to settle everyone. Names in "paidBy" must match the crew names exactly.</p></div></section>';
+  '<div class="card" style="margin-top:14px"><h3>Expenses</h3><div class="tw"><table><tr><th>What</th><th>Category</th><th class="r">Amount</th></tr>'+B.map(b=>'<tr><td>'+esc(b.label)+'</td><td>'+esc(b.cat)+'</td><td class="r">'+money(b.amount)+'</td></tr>').join('')+'<tr><td colspan="2"><b>Total</b></td><td class="r"><b>'+money(total)+'</b></td></tr></table></div></div>'+
+  '</section>';
 },
 gallery(){
   const P=TRIP.photos;

@@ -58,7 +58,7 @@ const TRIP = {
     host: "Host name", hostPhone: "",
     bedrooms: 3, beds: "3 double beds",
     wifi: "Network / password",
-    pricePerNight: 9000, nights: 3,   // TODO: real price per night
+    totalCost: 28000, nights: 3,
     perks: ["Add the real perks from the listing, e.g. pool, kitchen, parking"],   // TODO
     rules: ["Add the host's house rules from the listing"]   // TODO
   },
@@ -75,14 +75,14 @@ const TRIP = {
     tips: ["Take photos of the car before driving", "Keep to the speed limits, especially near beaches", "No drink-driving. Nominate a driver each night."]
   },
 
-  // Budget: who paid and how much. Everything is split equally between all 6.
-  budget: [                       // (SAMPLE) replace with real expenses as you go
-    { cat: "Stay",     label: "Homero Villa (3 nights)", amount: 27000, paidBy: "Anunay" },
-    { cat: "Travel",   label: "Car rental",        amount: 12000, paidBy: "Shruti" },
-    { cat: "Travel",   label: "Fuel",              amount: 4000,  paidBy: "Shruti" },
-    { cat: "Food",     label: "Welcome dinner",    amount: 6500,  paidBy: "Sarvpriya" },
-    { cat: "Activity", label: "Water sports",      amount: 7200,  paidBy: "Akriti" },
-    { cat: "Drinks",   label: "Beach shack bar",   amount: 5400,  paidBy: "Deepak" }
+  // Budget: everything is split equally between the 6 friends (Arsi is not counted).
+  budget: [                       // Villa is real; the rest are SAMPLE amounts, replace with real expenses as you go
+    { cat: "Stay",     label: "Homero Villa (3 nights)", amount: 28000 },
+    { cat: "Travel",   label: "Car rental",        amount: 12000 },
+    { cat: "Travel",   label: "Fuel",              amount: 4000 },
+    { cat: "Food",     label: "Welcome dinner",    amount: 6500 },
+    { cat: "Activity", label: "Water sports",      amount: 7200 },
+    { cat: "Drinks",   label: "Beach shack bar",   amount: 5400 }
   ],
   planned: 90000,                 // total budget you aim for, for the whole group
 
