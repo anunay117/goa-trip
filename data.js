@@ -132,10 +132,10 @@ const TRIP = {
   outfits: {
     intro: "Goa in early December is hot in the day (about 32°C) and mild at night (about 21°C). Think light cotton, linen and flowy fabrics, in whatever length and style you like.",
     ideas: [
-      { title: "Travel-day kurta set", emoji: "✈️", when: "Day 1: the 05:00 flight and arrival", photo: 36311379,
-        why: "Breathable cotton, easy to move in, and still looks put-together when you land at 07:35.",
-        tips: "Pair with palazzos or leggings and keep the dupatta handy as a scarf for the cold flight.",
-        shop: [{ label: "Kurta sets on Myntra", url: "https://www.myntra.com/kurta-sets" }, { label: "Palazzos", url: "https://www.myntra.com/palazzos" }] },
+      { title: "Airport fit: smart layers", emoji: "✈️", when: "Day 1: the 05:00 flight and arrival", photo: 4173231,
+        why: "Delhi at 4 AM in December is cold, but Goa at 7:35 AM is already warm. A tee, wide-leg jeans or trousers and white sneakers, with an oversized shirt or light jacket on top, covers both.",
+        tips: "Wear the layer on the flight, then tie it round your waist or stuff it in your tote when you land.",
+        shop: [{ label: "Oversized shirts", url: "https://www.myntra.com/oversized-shirt" }, { label: "Wide-leg jeans", url: "https://www.myntra.com/wide-leg-jeans" }, { label: "White sneakers", url: "https://www.myntra.com/white-sneakers" }, { label: "Jackets", url: "https://www.myntra.com/women-jackets" }] },
       { title: "Flowy white maxi", emoji: "🌊", when: "Beach walks and sunsets", photo: 9783413,
         why: "Covers you up, catches the sea breeze and photographs beautifully at golden hour.",
         tips: "Pick light colours or pastels, a full-length cotton or rayon blend, and wear shorts underneath for windy beaches.",
@@ -177,15 +177,15 @@ const TRIP = {
         tips: "A full-length one is more flattering with sandals, and a belt keeps it from looking shapeless.",
         shop: [{ label: "Jumpsuits on Myntra", url: "https://www.myntra.com/jumpsuit" }] },
       { title: "Modest midi for churches", emoji: "⛪", when: "Day 4: Old Goa churches", photo: 20544951,
-        why: "Goa's old churches expect covered shoulders and knees, and a cotton midi or kurta handles that without being hot.",
+        why: "Goa's old churches expect covered shoulders and knees, and a cotton midi or long dress handles that without being hot.",
         tips: "Carry a stole or dupatta so you can cover up quickly, and wear shoes that are easy to slip off at the entrance.",
-        shop: [{ label: "Midi dresses", url: "https://www.myntra.com/midi-dresses" }, { label: "Kurta sets", url: "https://www.myntra.com/kurta-sets" }] }
+        shop: [{ label: "Midi dresses", url: "https://www.myntra.com/midi-dresses" }, { label: "Maxi dresses", url: "https://www.myntra.com/maxi-dresses" }] }
     ],
     plan: [
-      { day: "Day 1 (Thu 3 Dec)", looks: "Kurta set for the flight, then a flowy maxi for the sunset." },
+      { day: "Day 1 (Thu 3 Dec)", looks: "Layered airport fit for the flight, then a flowy maxi for the sunset." },
       { day: "Day 2 (Fri 4 Dec)", looks: "Shirt dress and hat for the day, one-piece or swim dress for the sea, jumpsuit for dinner." },
       { day: "Day 3 (Sat 5 Dec)", looks: "Kaftan for lunch, mini sundress or shorts and a top for exploring, party maxi for the night." },
-      { day: "Day 4 (Sun 6 Dec)", looks: "Modest midi or kurta for the churches, co-ord for the flight home." }
+      { day: "Day 4 (Sun 6 Dec)", looks: "Modest midi or long dress for the churches, co-ord for the flight home." }
     ],
     tips: [
       "Pack 6 to 8 light pieces, not 20. Mix and match, and repeat with different accessories.",
