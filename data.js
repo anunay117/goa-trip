@@ -18,8 +18,8 @@ const TRIP = {
     { name: "Shruti",    emoji: "🫶", role: "Mom on duty",                   from: "", phone: "" },
     { name: "Akriti",    emoji: "📱", role: "Influencer / content creator",  from: "", phone: "" },
     { name: "Deepak",    emoji: "🏔️", role: "Pahadi / vlogger",              from: "", phone: "" },
-    { name: "Sarvpriya", emoji: "🤩", role: "Most excited about Goa",        from: "", phone: "" },
-    { name: "Abhishek",  emoji: "🏖️", role: "Beach person",                  from: "", phone: "" }
+    { name: "Sarvpriya", emoji: "🤩", role: "Chief hype officer",            from: "", phone: "" },
+    { name: "Abhishek",  emoji: "🏖️", role: "Beach bum / sunset chaser",   from: "", phone: "" }
   ],
 
   itinerary: [                    // (SAMPLE activities) one object per day; dates are worked out from "start"
