@@ -27,9 +27,9 @@ home(){
   document.querySelectorAll('.check input').forEach(c=>c.onchange=()=>{const a=[...document.querySelectorAll('.check input:checked')].map(x=>x.dataset.n);try{localStorage.setItem('goa-pack2',JSON.stringify(a))}catch(x){}});
   const tick=()=>{const now=new Date();let ms=s-now,label='until we leave';if(ms<=0){ms=e-now+864e5;label=ms>0?'left of the trip':'';}
     if(ms<=0){$('#cd').innerHTML='<div><b>🌅</b><span>What a trip!</span></div>';return}
-    const d=Math.floor(ms/864e5),h=Math.floor(ms/36e5)%24,m=Math.floor(ms/6e4)%60;
-    $('#cd').innerHTML=[[d,'days'],[h,'hours'],[m,'mins']].map(x=>'<div><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join('')+'<div style="background:none;border:none;box-shadow:none;color:#111;align-self:center;font-weight:800;font-size:1.1rem">'+label+'</div>'};
-  tick();setInterval(tick,30000);
+    const d=Math.floor(ms/864e5),h=Math.floor(ms/36e5)%24,m=Math.floor(ms/6e4)%60,sec=Math.floor(ms/1e3)%60;
+    $('#cd').innerHTML=[[d,'days'],[h,'hours'],[m,'mins'],[sec,'secs']].map(x=>'<div><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join('')+'<div style="background:none;border:none;box-shadow:none;color:#111;align-self:center;font-weight:800;font-size:1.1rem">'+label+'</div>'};
+  tick();setInterval(tick,1000);
 },
 itinerary(){
   $('#app').innerHTML=head('The Plan 🗓️','Loosely a plan. Subject to vibes.')+'<section class="wrap">'+flightsHtml()+days().map((d,i)=>'<div class="card day"><h2>Day '+(i+1)+': '+esc(d.title)+'</h2><div class="dt">'+fmt(d.date)+'</div>'+d.items.map(x=>'<div class="it"><time>'+esc(x.t)+'</time><div>'+esc(x.text)+(x.note?'<div class="muted" style="font-size:.85rem">'+esc(x.note)+'</div>':'')+'</div></div>').join('')+'</div>').join('')+'</section>';
