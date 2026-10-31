@@ -59,47 +59,20 @@ budget(){
   '</section>';
 },
 imposter(){
-  const names=ppl.map(p=>p.name);
-  // Live word sources: each label maps to Wikipedia categories we pull random articles from
-  const LIVE={Food:['Fast food','Indian breads','Indian desserts','Goan cuisine'],Goa:['Beaches of Goa','Forts in Goa'],Animals:['Domesticated animals','Big cats'],Sports:['Summer Olympic sports','Ball games'],Places:['Countries in Asia','Tourist attractions in India'],'Cricket stars':['Indian cricket captains'],Objects:['Kitchenware']};
-  const CATS=Object.keys(LIVE),hits={},used=new Set();
-  const wp=p=>fetch('https://en.wikipedia.org/w/api.php?'+new URLSearchParams({format:'json',origin:'*',action:'query',...p})).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()});
-  const clean=t=>t.split(',')[0].replace(/\s*\(.*\)/,'').trim();
-  const pool={};
-  const liveWord=async()=>{
-    for(let tries=0;tries<3;tries++){
-      const label=shuffle([...cfg.cats])[0],cat=shuffle(LIVE[label])[0];
-      try{
-        if(!pool[cat]||!pool[cat].length){
-          if(hits[cat]==null){const h=await wp({list:'search',srsearch:'incategory:"'+cat.replace(/ /g,'_')+'"',srlimit:1,srinfo:'totalhits',srnamespace:0});hits[cat]=h.query.searchinfo.totalhits||0}
-          const off=hits[cat]>50?crypto.getRandomValues(new Uint32Array(1))[0]%Math.min(hits[cat]-50,300):0;
-          const d=await wp({generator:'search',gsrsearch:'incategory:"'+cat.replace(/ /g,'_')+'"',gsrlimit:50,gsroffset:off,gsrnamespace:0,prop:'description'});
-          const low=cat.toLowerCase();
-          pool[cat]=shuffle(Object.values((d.query||{}).pages||{}).map(p=>({raw:p.title,w:clean(p.title),d:(p.description||'').trim()})).filter(x=>{const t=x.w.toLowerCase();
-            return x.w.length>=3&&x.w.length<=22&&!/[:\d]/.test(x.raw)&&!/^list of/i.test(x.raw)&&!/cuisine|category|list/i.test(x.w)&&!low.includes(t)&&!t.includes(low)}));
-        }
-        let c;while(pool[cat].length){const x=pool[cat].pop();if(!used.has(x.w.toLowerCase())){c=x;break}}
-        if(!c)continue;
-        used.add(c.w.toLowerCase());
-        const leak=c.d&&c.w.toLowerCase().split(/\s+/).some(t=>t.length>3&&c.d.toLowerCase().includes(t));
-        const base=(!c.d||leak)?'':c.d.charAt(0).toUpperCase()+c.d.slice(1);
-        const h=!base?'Something from the "'+label+'" category':(base.length<16?base+' (from the "'+label+'" category)':base);
-        return {w:c.w,c:label,h,src:'wiki',url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(c.raw.replace(/ /g,'_'))};
-      }catch(e){if(!/^\d+$/.test(String(e&&e.message)))break;await new Promise(r=>setTimeout(r,1200))}
-    }
-    return null};
-  const offlineWord=()=>{let pool=WORDS.filter(w=>cfg.cats.has(w.c));if(!pool.length)pool=WORDS;pool=pool.filter(w=>!used.has(w.w.toLowerCase()))||pool;if(!pool.length)pool=WORDS;const w=shuffle(pool)[0];used.add(w.w.toLowerCase());return {...w,src:'offline'}};
+  const names=ppl.map(p=>p.name),CATS=[...new Set(WORDS.map(w=>w.c))];
   let S;try{S=JSON.parse(localStorage.getItem('goa-imposter'))}catch(e){}
   S=S&&S.pts&&S.hist?S:{pts:{},hist:[],impWins:0,inWins:0};
   names.forEach(n=>{if(!(n in S.pts))S.pts[n]=0});
   const save=()=>{try{localStorage.setItem('goa-imposter',JSON.stringify(S))}catch(e){}};
   const cfg={play:new Set(names),cats:new Set(CATS),clue:true};
-  let R=null,last={imp:null,word:null},tmin=3,left=180,tid=null,busy=false;
+  let R=null,deck=[],last={imp:null,word:null},tmin=3,left=180,tid=null;
   const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=crypto.getRandomValues(new Uint32Array(1))[0]%(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
   const mm=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
-  const start=async()=>{if(busy)return;busy=true;const pl=names.filter(n=>cfg.play.has(n));R={phase:'loading'};draw();
+  const pickWord=()=>{const ok=w=>cfg.cats.has(w.c);deck=deck.filter(ok);if(!deck.length)deck=shuffle(WORDS.filter(ok));
+    let w=deck.pop();if(w.w===last.word&&deck.length)w=deck.pop();return w};
+  const start=()=>{const pl=names.filter(n=>cfg.play.has(n));
     const pool=pl.length>2?pl.filter(n=>n!==last.imp):pl,imp=pool[crypto.getRandomValues(new Uint32Array(1))[0]%pool.length];
-    const word=(await liveWord())||offlineWord();busy=false;last={imp,word:word.w};clearInterval(tid);tid=null;left=tmin*60;
+    const word=pickWord();last={imp,word:word.w};clearInterval(tid);tid=null;left=tmin*60;
     R={word,imp,order:shuffle(pl),idx:0,shown:false,phase:'pass',res:null}};
   const record=win=>{const inn=R.order.filter(n=>n!==R.imp);
     if(win==='imp'){S.pts[R.imp]=(S.pts[R.imp]||0)+2;S.impWins++}else{inn.forEach(n=>S.pts[n]=(S.pts[n]||0)+1);S.inWins++}
@@ -109,18 +82,17 @@ imposter(){
     if(!R){
       top='<div class="card"><h3>⚙️ Set up</h3><p class="muted" style="margin-bottom:6px">Who is playing?</p>'+names.map(n=>'<button class="chip'+(cfg.play.has(n)?' on':'')+'" data-act="pl" data-n="'+esc(n)+'">'+esc(n)+'</button>').join('')+
       '<p class="muted" style="margin:12px 0 6px">Word categories</p>'+CATS.map(c=>'<button class="chip'+(cfg.cats.has(c)?' on':'')+'" data-act="cat" data-c="'+esc(c)+'">'+esc(c)+'</button>').join('')+
-      '<label class="chk" style="margin-top:12px"><input type="checkbox" data-act="clue" '+(cfg.clue?'checked':'')+'> Imposter gets a clue (off = category only, harder)</label><p class="muted" style="font-size:.82rem;margin-top:6px">A fresh random word is picked live from Wikipedia every round (needs internet). With no signal it falls back to a small built-in list.</p>'+
+      '<label class="chk" style="margin-top:12px"><input type="checkbox" data-act="clue" '+(cfg.clue?'checked':'')+'> Imposter gets a subtle hint (off = no hint, hard mode)</label>'+
       '<button class="btn2" data-act="start"'+(np<3||!cfg.cats.size?' disabled':'')+'>🎲 Start round</button>'+(np<3?'<span class="muted"> Need at least 3 players.</span>':'')+'</div>';
-    }else if(R.phase==='loading'){top='<div class="card"><h3>🎲 Picking a word&hellip;</h3><p class="muted">Pulling a random word live from Wikipedia.</p></div>';
     }else if(R.phase==='pass'){
       const n=R.order[R.idx],isImp=n===R.imp;
       top='<div class="card"><h3>Round '+(S.hist.length+1)+': pass the phone</h3>'+(R.shown?
-        '<div class="rolecard">'+(isImp?'<div class="re">🕵️</div><h3>You are the imposter</h3><p>Category: <b>'+esc(R.word.c)+'</b></p>'+(cfg.clue?'<p style="margin-top:6px">Clue: '+esc(R.word.h)+'</p>':'')+'<p style="margin-top:10px;color:var(--lime)">Blend in. Do not get caught.</p>':'<div class="re">🔤</div><p>Category: <b>'+esc(R.word.c)+'</b></p><h3 style="font-size:2.4rem;margin-top:6px">'+esc(R.word.w)+'</h3><p style="margin-top:10px;color:var(--lime)">Do not say it out loud.</p>')+'</div><p class="muted" style="margin:10px 0">Memorise it, then hide it before passing.</p><button class="btn2" data-act="hide">Got it, hide &amp; pass</button>'
+        '<div class="rolecard">'+(isImp?'<div class="re">🕵️</div><h3>You are the imposter</h3>'+(cfg.clue?'<p style="margin-top:8px">Your hint:</p><h3 style="font-size:2.2rem">'+esc(R.word.h)+'</h3>':'<p style="margin-top:8px">No hint this time. Good luck!</p>')+'<p style="margin-top:10px;color:var(--lime)">Blend in. Do not get caught.</p>':'<div class="re">🔤</div><p>The word is</p><h3 style="font-size:2.4rem;margin-top:6px">'+esc(R.word.w)+'</h3><p style="margin-top:10px;color:var(--lime)">Do not say it out loud.</p>')+'</div><p class="muted" style="margin:10px 0">Memorise it, then hide it before passing.</p><button class="btn2" data-act="hide">Got it, hide &amp; pass</button>'
         :'<p style="font-size:1.25rem">Pass the phone to <b>'+esc(n)+'</b></p><p class="muted" style="margin:6px 0 12px">('+(R.idx+1)+' of '+R.order.length+') Make sure nobody else is looking.</p><button class="btn2" data-act="show">👀 I am '+esc(n)+', show it</button>')+'</div>';
     }else if(R.phase==='debate'){
       top='<div class="card"><h3>🗣️ Debate time</h3><p>Everyone has seen their card. Take turns describing the word <b>without saying it</b>, then vote for who you think the imposter is.</p><div class="big" id="tm" style="margin-top:10px">'+mm(left)+'</div><div style="margin:8px 0">'+[1,2,3,5].map(m=>'<button class="chip'+(m===tmin?' on':'')+'" data-act="tmin" data-m="'+m+'">'+m+' min</button>').join('')+'</div><button class="btn2" data-act="tstart">'+(tid?'Pause':'Start timer')+'</button> <button class="btn2 alt" data-act="treset">Reset</button><hr style="border:0;border-top:2px dashed var(--bd);margin:14px 0"><p class="muted" style="margin-bottom:8px">Voted? Reveal the truth.</p><button class="btn2" data-act="reveal">🎭 Reveal imposter &amp; word</button></div>';
     }else if(R.phase==='reveal'){
-      top='<div class="card"><h3>🎭 The reveal</h3><p style="font-size:1.2rem">The imposter was <b>'+esc(R.imp)+'</b>.</p><p style="font-size:1.2rem;margin-top:4px">The word was <b>'+esc(R.word.w)+'</b> <span class="muted">('+esc(R.word.c)+')</span>.</p>'+(R.word.src==='wiki'?'<p class="muted" style="font-size:.85rem;margin-top:4px">Picked live from <a href="'+esc(R.word.url)+'" target="_blank" rel="noopener">Wikipedia</a>.</p>':'<p class="muted" style="font-size:.85rem;margin-top:4px">Offline backup word (Wikipedia was unreachable).</p>')+'<p style="margin:14px 0 8px;font-weight:800">Who won this round?</p><button class="btn2" data-act="win" data-w="inn">🧑‍🤝‍🧑 Innocents won</button> <button class="btn2 alt" data-act="win" data-w="imp">🕵️ Imposter won</button></div>';
+      top='<div class="card"><h3>🎭 The reveal</h3><p style="font-size:1.2rem">The imposter was <b>'+esc(R.imp)+'</b>.</p><p style="font-size:1.2rem;margin-top:4px">The word was <b>'+esc(R.word.w)+'</b> <span class="muted">('+esc(R.word.c)+')</span>.</p><p style="margin:14px 0 8px;font-weight:800">Who won this round?</p><button class="btn2" data-act="win" data-w="inn">🧑‍🤝‍🧑 Innocents won</button> <button class="btn2 alt" data-act="win" data-w="imp">🕵️ Imposter won</button></div>';
     }else{
       top='<div class="card"><h3>'+(R.res==='imp'?'🕵️ Imposter wins!':'🧑‍🤝‍🧑 Innocents win!')+'</h3><p>'+(R.res==='imp'?esc(R.imp)+' fooled everyone (+2 points).':'They caught '+esc(R.imp)+' (+1 point each).')+'</p><p class="muted" style="margin:6px 0 12px">The word was '+esc(R.word.w)+'.</p><button class="btn2" data-act="start">▶️ Next round (new word)</button> <button class="btn2 alt" data-act="setup">Change players / categories</button></div>';
     }
@@ -134,10 +106,9 @@ imposter(){
   };
   $('#app').addEventListener('click',e=>{
     const b=e.target.closest('[data-act]');if(!b||b.type==='checkbox')return;const a=b.dataset.act;
-    if(R&&R.phase==='loading')return;
     if(a==='pl'){const n=b.dataset.n;cfg.play.has(n)?cfg.play.delete(n):cfg.play.add(n)}
     else if(a==='cat'){const c=b.dataset.c;cfg.cats.has(c)?cfg.cats.delete(c):cfg.cats.add(c)}
-    else if(a==='start'){if(b.disabled)return;start().then(draw)}
+    else if(a==='start'){if(b.disabled)return;start()}
     else if(a==='setup'){R=null}
     else if(a==='show')R.shown=true;
     else if(a==='hide'){R.shown=false;R.idx++;if(R.idx>=R.order.length)R.phase='debate'}
@@ -152,6 +123,7 @@ imposter(){
   $('#app').addEventListener('change',e=>{if(e.target.dataset.act==='clue'){cfg.clue=e.target.checked;draw()}});
   draw();
 },
+
 gallery(){
   const P=TRIP.photos;
   $('#app').innerHTML=head('Core Memories 📸','Receipts for the group chat.')+'<section class="wrap">'+(P.length?'<div class="pics">'+P.map(p=>'<figure data-s="'+esc(p.src)+'"><img loading="lazy" src="'+esc(p.src)+'" alt="'+esc(p.caption)+'"><figcaption>'+esc(p.caption)+'</figcaption></figure>').join('')+'</div>':'<div class="card" style="text-align:center"><div class="ph0">📸</div><h3>Camera roll is empty (for now)</h3><p class="muted">Copy your pictures into the <code>photos/</code> folder and list them in <code>data.js</code> under <code>photos</code>.</p></div>')+'</section><div id="lb"><img alt=""></div>';
