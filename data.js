@@ -2,7 +2,7 @@
 // Items marked (SAMPLE) are placeholders. Replace them with the real details.
 const TRIP = {
   name: "Goa Trip 2026",
-  tagline: "6 besties. 1 villa. 0 braincells. It's giving Goa 🌴",
+  tagline: "6 besties. 1 villa. 0 braincells. Goa, we are NOT being normal about this 🌴",
   start: "2026-12-03",            // first day, YYYY-MM-DD
   end: "2026-12-06",              // last day
   from: "Home",                   // where everyone starts
@@ -13,13 +13,13 @@ const TRIP = {
     { who: "Anunay", airline: "IndiGo", no: "6E 5008", date: "2026-12-06", from: "Goa (GOI, Dabolim)", to: "Delhi (DEL, T3)", dep: "22:30", arr: "01:05 (7 Dec)", dur: "2h 35m", note: "Bag drop closes 21:30" }
   ],
 
-  crew: [                         // (SAMPLE) add the 6 real people. role/emoji are just for fun
-    { name: "Friend 1 (me)", emoji: "😎", role: "Trip planner",   from: "Bengaluru", phone: "" },
-    { name: "Friend 2",      emoji: "🚗", role: "Chief driver",   from: "Delhi",     phone: "" },
-    { name: "Friend 3",      emoji: "📸", role: "Photographer",   from: "Mumbai",    phone: "" },
-    { name: "Friend 4",      emoji: "🎧", role: "Playlist DJ",    from: "Pune",      phone: "" },
-    { name: "Friend 5",      emoji: "🍹", role: "Food & drinks",  from: "Hyderabad", phone: "" },
-    { name: "Friend 6",      emoji: "🧭", role: "Navigator",      from: "Chennai",   phone: "" }
+  crew: [
+    { name: "Anunay",    emoji: "🧠", role: "The trip planner",              from: "", phone: "" },
+    { name: "Shruti",    emoji: "🫶", role: "Mom on duty",                   from: "", phone: "" },
+    { name: "Akriti",    emoji: "📱", role: "Influencer / content creator",  from: "", phone: "" },
+    { name: "Deepak",    emoji: "🏔️", role: "Pahadi / vlogger",              from: "", phone: "" },
+    { name: "Sarvpriya", emoji: "🤩", role: "Most excited about Goa",        from: "", phone: "" },
+    { name: "Abhishek",  emoji: "🏖️", role: "Beach person",                  from: "", phone: "" }
   ],
 
   itinerary: [                    // (SAMPLE activities) one object per day; dates are worked out from "start"
@@ -68,7 +68,7 @@ const TRIP = {
     phone: "",
     pickup: "To be decided, 3 Dec",
     dropoff: "To be decided, 6 Dec",
-    drivers: ["Friend 2", "Friend 1"],
+    drivers: ["To be decided"],
     seats: 7, rentalTotal: 12000, fuelEstimate: 4000, deposit: 5000,   // TODO: real quote
     docs: ["Driving licence (original)", "Aadhaar / ID", "Booking confirmation"],
     tips: ["Take photos of the car before driving", "Keep to the speed limits, especially near beaches", "No drink-driving. Nominate a driver each night."]
@@ -76,12 +76,12 @@ const TRIP = {
 
   // Budget: who paid and how much. Everything is split equally between all 6.
   budget: [                       // (SAMPLE) replace with real expenses as you go
-    { cat: "Stay",     label: "Homero Villa (3 nights)", amount: 27000, paidBy: "Friend 1 (me)" },
-    { cat: "Travel",   label: "Car rental",        amount: 12000, paidBy: "Friend 2" },
-    { cat: "Travel",   label: "Fuel",              amount: 4000,  paidBy: "Friend 2" },
-    { cat: "Food",     label: "Welcome dinner",    amount: 6500,  paidBy: "Friend 5" },
-    { cat: "Activity", label: "Water sports",      amount: 7200,  paidBy: "Friend 3" },
-    { cat: "Drinks",   label: "Beach shack bar",   amount: 5400,  paidBy: "Friend 4" }
+    { cat: "Stay",     label: "Homero Villa (3 nights)", amount: 27000, paidBy: "Anunay" },
+    { cat: "Travel",   label: "Car rental",        amount: 12000, paidBy: "Shruti" },
+    { cat: "Travel",   label: "Fuel",              amount: 4000,  paidBy: "Shruti" },
+    { cat: "Food",     label: "Welcome dinner",    amount: 6500,  paidBy: "Sarvpriya" },
+    { cat: "Activity", label: "Water sports",      amount: 7200,  paidBy: "Akriti" },
+    { cat: "Drinks",   label: "Beach shack bar",   amount: 5400,  paidBy: "Deepak" }
   ],
   planned: 90000,                 // total budget you aim for, for the whole group
 

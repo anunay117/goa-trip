@@ -70,3 +70,4 @@ th{background:#111;color:var(--lime);font-size:.75rem;text-transform:uppercase;l
 footer{text-align:center;padding:36px 16px 44px;font-weight:700;border-top:3px solid var(--bd);background:var(--lime);color:#111}
 @media(max-width:560px){.kv{grid-template-columns:1fr}.it{grid-template-columns:64px 1fr}.card{box-shadow:5px 5px 0 var(--bd)}}
 section.wrap{padding-top:22px;padding-bottom:30px}
+.ph.wrap{padding-left:16px;padding-right:16px}

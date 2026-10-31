@@ -34,7 +34,7 @@ itinerary(){
   $('#app').innerHTML=head('The Plan 🗓️','Loosely a plan. Subject to vibes.')+'<section class="wrap">'+flightsHtml()+days().map((d,i)=>'<div class="card day"><h2>Day '+(i+1)+': '+esc(d.title)+'</h2><div class="dt">'+fmt(d.date)+'</div>'+d.items.map(x=>'<div class="it"><time>'+esc(x.t)+'</time><div>'+esc(x.text)+(x.note?'<div class="muted" style="font-size:.85rem">'+esc(x.note)+'</div>':'')+'</div></div>').join('')+'</div>').join('')+'</section>';
 },
 crew(){
-  $('#app').innerHTML=head('The Squad 👯',TRIP.crew.length+' besties, one whip, one crib. No notes.')+'<section class="wrap"><div class="grid">'+TRIP.crew.map(p=>'<div class="card person"><div class="av">'+esc(p.emoji)+'</div><h3>'+esc(p.name)+'</h3><div class="muted">'+esc(p.from)+'</div><span class="tag">'+esc(p.role)+'</span>'+(p.phone?'<div style="margin-top:8px"><a href="tel:'+esc(p.phone)+'">'+esc(p.phone)+'</a></div>':'')+'</div>').join('')+'</div></section>';
+  $('#app').innerHTML=head('The Squad 👯',TRIP.crew.length+' besties, one whip, one crib. No notes.')+'<section class="wrap"><div class="grid">'+TRIP.crew.map(p=>'<div class="card person"><div class="av">'+esc(p.emoji)+'</div><h3>'+esc(p.name)+'</h3>'+(p.from?'<div class="muted">'+esc(p.from)+'</div>':'')+'<span class="tag">'+esc(p.role)+'</span>'+(p.phone?'<div style="margin-top:8px"><a href="tel:'+esc(p.phone)+'">'+esc(p.phone)+'</a></div>':'')+'</div>').join('')+'</div></section>';
 },
 stay(){
   const s=TRIP.stay;
