@@ -120,6 +120,9 @@ const TRIP = {
     { name: "English Hits",         emoji: "🇮🇳", lang: "English",       vibe: "The English songs Indians stream the most",
       sp: "2cXI31t2XnElhPLj7aVJlD", spName: "Most Popular English Songs (India)",
       yt: "PLOfGUSnj9XxQuiy8B50WGfvMUmAITKC0B", ytName: "Best English Songs (a general hits list, not India-specific)" },
+    { name: "Punjabi Hits",         emoji: "🔥", lang: "Punjabi",       vibe: "Karan Aujla, Diljit Dosanjh, AP Dhillon, Shubh and more",
+      sp: "06dPsSrdu6C5gaQyPLm4Lx", spName: "Punjabi Pop Reloaded 2026 (Diljit, Karan Aujla, Guru Randhawa)",
+      yt: "PLO7-VO1D0_6NYoMAN0XncJu4tvibirSmN", ytName: "Punjabi Song Playlist 2026 (Karan Aujla, Diljit, AP Dhillon, Shubh)" },
     { name: "Hindi Rap",            emoji: "🎤", lang: "Hindi",         vibe: "Desi hip-hop for the back seat",
       sp: "572Hmii6eSuDai46ZJXgIe", spName: "The Sound of Hindi Hip Hop (by Spotify)",
       yt: "PLJtpjlkBVF4wneUJqC9SZPhBiEBQmmEsi", ytName: "Top Hindi Rap Songs of All Time" }
