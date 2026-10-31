@@ -76,15 +76,17 @@ const TRIP = {
   },
 
   // Budget: everything is split equally between the 6 friends (Arsi is not counted).
-  budget: [                       // Villa is real; the rest are SAMPLE amounts, replace with real expenses as you go
+  budget: [                       // Villa and flights are real. Car rental, fuel, dinner, water sports and bar are SAMPLE amounts. "exclude" = people who do not share that cost, "only" = just these people pay it
     { cat: "Stay",     label: "Homero Villa (3 nights)", amount: 28000 },
+    { cat: "Travel",   label: "Flights (IndiGo, Delhi-Goa-Delhi)", amount: 123135, exclude: ["Deepak"] },   // Deepak has a separate ticket
+    { cat: "Travel",   label: "Arsi's flight (infant fare + tax)", amount: 4000, only: ["Anunay"], short: "Arsi" },   // charged to Anunay only
     { cat: "Travel",   label: "Car rental",        amount: 12000 },
     { cat: "Travel",   label: "Fuel",              amount: 4000 },
     { cat: "Food",     label: "Welcome dinner",    amount: 6500 },
     { cat: "Activity", label: "Water sports",      amount: 7200 },
     { cat: "Drinks",   label: "Beach shack bar",   amount: 5400 }
   ],
-  planned: 90000,                 // total budget you aim for, for the whole group
+  planned: null,                  // optional: set a total target (e.g. 250000) to show a progress bar
 
   // Goa in early December: dry & sunny, hot days, mild nights, warm sea (averages, sources vary by 1-2 degrees)
   weather: { hi: "32°C", lo: "21°C", sea: "28°C", rain: "~0-1 days", sun: "~10 hrs", note: "Dry season and peak tourist season, so book dinner spots early. Check the 3-day forecast before you leave." },
