@@ -25,8 +25,8 @@ const plCard=p=>'<div class="card pl"><div class="ple">'+p.emoji+'</div><h3>'+es
 const R={
 home(){
   const s=parse(TRIP.start),e=parse(TRIP.end),w=TRIP.weather;
-  const em={itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',imposter:'🕵️',gallery:'📸'};
-  const tiles=PAGES.slice(1).map(p=>'<a class="card tile" href="'+p[0]+'"><div class="e">'+em[p[2]]+'</div><h3>'+p[1]+'</h3></a>').join('');
+  const em={itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',playlists:'🎧',imposter:'🕵️',gallery:'📸'};
+  const tiles=PAGES.slice(1).map(p=>'<a class="card tile" href="'+p[0]+'"><div class="e">'+(em[p[2]]||'•')+'</div><h3>'+p[1]+'</h3></a>').join('');
   let pk=[];try{pk=JSON.parse(localStorage.getItem('goa-pack2')||'[]')}catch(x){}
   const groups=TRIP.packing.map(g=>'<div class="card check"><h3>'+g.emoji+' '+esc(g.group)+'</h3>'+g.items.map(x=>'<label><input type="checkbox" data-n="'+esc(x)+'" '+(pk.includes(x)?'checked':'')+'> '+esc(x)+'</label>').join('')+'</div>').join('');
   $('#app').innerHTML='<header class="hero"><div class="wrap"><h1><span>out of office</span></h1><p>'+esc(TRIP.tagline)+'</p><div><span class="stk">'+fmt(s,{day:'numeric',month:'short'})+' → '+fmt(e,{day:'numeric',month:'short'})+'</span><span class="stk">'+ppl.length+' besties</span><span class="stk">'+nights+' nights</span><span class="stk">no cap</span></div><div class="cd" id="cd"></div></div></header>'+
