@@ -8,7 +8,7 @@ a{color:var(--ink);font-weight:700}
 .wrap{max-width:1020px;margin:0 auto;padding:0 16px}
 /* nav */
 nav{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:3px solid var(--bd)}
-nav .wrap{display:flex;align-items:center;gap:8px;height:64px;overflow-x:auto;scrollbar-width:none}
+nav .wrap{display:flex;align-items:center;gap:8px;min-height:64px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
 nav .logo{font:800 1.25rem "Bricolage Grotesque";text-decoration:none;white-space:nowrap;background:var(--pink);color:#111;border:3px solid var(--bd);border-radius:12px;padding:4px 12px;box-shadow:3px 3px 0 var(--bd);transform:rotate(-2deg);margin-right:8px}
 nav a.l{padding:6px 14px;border:2px solid var(--bd);border-radius:999px;text-decoration:none;font-weight:700;font-size:.85rem;white-space:nowrap;background:var(--card)}
 nav a.l:hover{background:var(--yellow);color:#111}nav a.on{background:var(--lime);color:#111;box-shadow:2px 2px 0 var(--bd)}
@@ -81,3 +81,20 @@ section.wrap{padding-top:22px;padding-bottom:30px}
 .chip{font:700 .85rem "Space Grotesk";border:2px solid var(--bd);background:var(--card);color:var(--ink);border-radius:999px;padding:4px 14px;margin-right:6px;cursor:pointer}.chip.on{background:var(--lime);color:#111}
 .rolecard{background:#111;color:#fff;border:3px solid var(--lime);border-radius:18px;padding:18px;text-align:center;box-shadow:6px 6px 0 var(--pink)}
 .rolecard .re{font-size:3.4rem}.rolecard h3{color:var(--lime);text-transform:uppercase;font-size:1.8rem}
+
+/* menu button + full menu (phones and small tablets) */
+.mbtn{display:none;margin-left:auto;font:800 1rem "Bricolage Grotesque";background:var(--lime);color:#111;border:3px solid var(--bd);border-radius:12px;padding:8px 16px;box-shadow:3px 3px 0 var(--bd);cursor:pointer}
+.menu{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);display:none}
+.menu.on{display:block}
+.menu .panel{position:absolute;top:0;left:0;right:0;max-height:100%;overflow:auto;background:var(--bg);border-bottom:3px solid var(--bd);padding:14px 16px 22px}
+.menu .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.menu .mh b{font:800 1.6rem "Bricolage Grotesque";text-transform:uppercase}
+.menu .mh button{font:800 .95rem "Bricolage Grotesque";background:var(--yellow);color:#111;border:3px solid var(--bd);border-radius:12px;padding:6px 14px;cursor:pointer}
+.menu .mg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.menu .mg a{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:#111;font:800 1.1rem "Bricolage Grotesque";border:3px solid var(--bd);border-radius:16px;padding:12px 14px;box-shadow:4px 4px 0 var(--bd);min-height:78px}
+.menu .mg a span{font-size:1.7rem;line-height:1}.menu .mg a small{font:700 .7rem "Space Grotesk";text-transform:uppercase;letter-spacing:.06em}
+.menu .mg a:nth-child(8n+1){background:var(--lime)}.menu .mg a:nth-child(8n+2){background:var(--yellow)}.menu .mg a:nth-child(8n+3){background:var(--cyan)}.menu .mg a:nth-child(8n+4){background:var(--orange)}
+.menu .mg a:nth-child(8n+5){background:var(--pink)}.menu .mg a:nth-child(8n+6){background:#7dffb2}.menu .mg a:nth-child(8n+7){background:var(--yellow)}.menu .mg a:nth-child(8n+8){background:var(--cyan)}
+.menu .mg a.cur{outline:4px solid #111;outline-offset:2px}
+@media(max-width:1100px){nav a.l{display:none}.mbtn{display:inline-flex}}
+nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
