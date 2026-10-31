@@ -130,7 +130,7 @@ const TRIP = {
 
   // Fit Check page (outfit ideas). Photos are free Pexels stock photos (id = Pexels photo id); shop links are Myntra category pages and search links.
   outfits: {
-    intro: "Goa in early December is hot in the day (about 32°C) and mild at night (about 21°C). Think light cotton, linen and flowy fabrics, plus covered-up beachwear that still looks good.",
+    intro: "Goa in early December is hot in the day (about 32°C) and mild at night (about 21°C). Think light cotton, linen and flowy fabrics, in whatever length and style you like.",
     ideas: [
       { title: "Travel-day kurta set", emoji: "✈️", when: "Day 1: the 05:00 flight and arrival", photo: 36311379,
         why: "Breathable cotton, easy to move in, and still looks put-together when you land at 07:35.",
@@ -148,10 +148,22 @@ const TRIP = {
         why: "Loose, full-length and super comfortable. Easy to throw over your swim set and walk straight to lunch.",
         tips: "Choose one in cotton or viscose, and skip heavy embroidery in the heat.",
         shop: [{ label: "Kaftans on Myntra", url: "https://www.myntra.com/kaftan" }] },
-      { title: "Swim in a long dress or a modest swim set", emoji: "🏊‍♀️", when: "Sea and pool time", photo: 17437768,
-        why: "No bikinis needed. A swim dress with shorts, or a rash guard with swim leggings, covers you fully and dries fast.",
-        tips: "Choose dark or print colours, quick-dry fabric, and pack a second set so you always have a dry one. A cotton long dress over it works for wading in.",
-        shop: [{ label: "Swim dresses", url: "https://www.myntra.com/swim-dress" }, { label: "Rash guards", url: "https://www.myntra.com/women-rash-guard" }, { label: "Swim dress + shorts (Amazon)", url: "https://www.amazon.in/s?k=women+swim+dress+with+shorts" }] },
+      { title: "Mini sundress + hat", emoji: "🌞", when: "Cafe hopping and beach clubs", photo: 9214356,
+        why: "Short, light and fun. A cotton or linen mini is the coolest thing you can wear at 32°C.",
+        tips: "Add a straw hat and sunglasses, and carry a tote for sunscreen and a stole for the evening breeze.",
+        shop: [{ label: "Mini dresses", url: "https://www.myntra.com/mini-dresses" }, { label: "Sundresses", url: "https://www.myntra.com/sundress" }, { label: "Sun hats", url: "https://www.myntra.com/sun-hat" }] },
+      { title: "Floral summer dress", emoji: "🌸", when: "Market walks, lunch dates, golden-hour photos", photo: 4589436,
+        why: "A short or knee-length floral dress is easy, pretty and photographs well in the Goa light.",
+        tips: "Go for cotton or muslin with a smocked or adjustable top, so it stays comfortable all day.",
+        shop: [{ label: "Short dresses", url: "https://www.myntra.com/short-dresses" }, { label: "Midi dresses", url: "https://www.myntra.com/midi-dresses" }] },
+      { title: "Denim shorts + top", emoji: "👖", when: "Scooter rides, markets and beach hopping", photo: 6601926,
+        why: "Shorts with a crop top or a knotted shirt are the easiest beach-day outfit and dry fast.",
+        tips: "Light-wash or soft cotton shorts stay cooler than heavy denim, and a loose shirt on top protects from the sun.",
+        shop: [{ label: "Women's shorts", url: "https://www.myntra.com/women-shorts" }, { label: "Crop tops", url: "https://www.myntra.com/crop-tops" }] },
+      { title: "One-piece or swim dress", emoji: "🏊‍♀️", when: "Sea and pool time", photo: 17437768,
+        why: "A one-piece, tankini or swim dress with shorts is comfortable in the water, dries fast and is easy to pair with a cover-up.",
+        tips: "Pack two sets so you always have a dry one, and keep a kaftan or cotton dress handy to walk back to the shack in.",
+        shop: [{ label: "One-piece swimwear", url: "https://www.myntra.com/one-piece-swimsuit" }, { label: "Swim dresses", url: "https://www.myntra.com/swim-dress" }, { label: "Tankinis", url: "https://www.myntra.com/tankini" }] },
       { title: "Co-ord set", emoji: "🧺", when: "Sightseeing and travel back", photo: 18665107,
         why: "A matching top and palazzo or trousers is the easiest outfit in your bag: one piece, no thinking.",
         tips: "Linen or cotton co-ords are comfortable on the 22:30 flight home too.",
@@ -171,8 +183,8 @@ const TRIP = {
     ],
     plan: [
       { day: "Day 1 (Thu 3 Dec)", looks: "Kurta set for the flight, then a flowy maxi for the sunset." },
-      { day: "Day 2 (Fri 4 Dec)", looks: "Shirt dress and hat for the day, swim dress for the sea, jumpsuit for dinner." },
-      { day: "Day 3 (Sat 5 Dec)", looks: "Kaftan for lunch, co-ord for exploring, party maxi for the night." },
+      { day: "Day 2 (Fri 4 Dec)", looks: "Shirt dress and hat for the day, one-piece or swim dress for the sea, jumpsuit for dinner." },
+      { day: "Day 3 (Sat 5 Dec)", looks: "Kaftan for lunch, mini sundress or shorts and a top for exploring, party maxi for the night." },
       { day: "Day 4 (Sun 6 Dec)", looks: "Modest midi or kurta for the churches, co-ord for the flight home." }
     ],
     tips: [
