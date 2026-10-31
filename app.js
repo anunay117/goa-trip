@@ -4,7 +4,7 @@ const money=n=>TRIP.currency+Math.round(n).toLocaleString('en-IN');
 const parse=d=>new Date(d+'T00:00:00');
 const fmt=(d,o)=>d.toLocaleDateString('en-IN',o||{weekday:'short',day:'numeric',month:'short'});
 const ppl=TRIP.crew.filter(c=>!c.infant);
-const PAGES=[['index.html','Home','home'],['itinerary.html','The Plan','itinerary'],['crew.html','The Squad','crew'],['stay.html','The Crib','stay'],['ride.html','The Whip','ride'],['budget.html','The Damage','budget'],['mafia.html','Maafia','mafia'],['gallery.html','Core Memories','gallery']];
+const PAGES=[['index.html','Home','home'],['itinerary.html','The Plan','itinerary'],['crew.html','The Squad','crew'],['stay.html','The Crib','stay'],['ride.html','The Whip','ride'],['budget.html','The Damage','budget'],['imposter.html','Imposter','imposter'],['gallery.html','Core Memories','gallery']];
 const page=document.body.dataset.page;
 document.title=(page==='home'?'':PAGES.find(p=>p[2]===page)[1]+' | ')+TRIP.name;
 document.body.insertAdjacentHTML('afterbegin','<nav><div class="wrap"><a class="logo" href="index.html">🌴 '+esc(TRIP.name)+'</a>'+PAGES.map(p=>'<a class="l'+(p[2]===page?' on':'')+'" href="'+p[0]+'">'+p[1]+'</a>').join('')+'</div></nav><div class="mq"><div>'+Array(8).join('<span>'+esc(TRIP.name)+' ✦ '+ppl.length+' BESTIES ✦ NO CAP ✦ OUT OF OFFICE ✦ </span>')+Array(8).join('<span>'+esc(TRIP.name)+' ✦ '+ppl.length+' BESTIES ✦ NO CAP ✦ OUT OF OFFICE ✦ </span>')+'</div></div>');
@@ -16,7 +16,7 @@ const flightsHtml=()=>!(TRIP.flights&&TRIP.flights.length)?'':'<div class="card"
 const R={
 home(){
   const s=parse(TRIP.start),e=parse(TRIP.end),w=TRIP.weather;
-  const em={itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',mafia:'🕵️',gallery:'📸'};
+  const em={itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',imposter:'🕵️',gallery:'📸'};
   const tiles=PAGES.slice(1).map(p=>'<a class="card tile" href="'+p[0]+'"><div class="e">'+em[p[2]]+'</div><h3>'+p[1]+'</h3></a>').join('');
   let pk=[];try{pk=JSON.parse(localStorage.getItem('goa-pack2')||'[]')}catch(x){}
   const groups=TRIP.packing.map(g=>'<div class="card check"><h3>'+g.emoji+' '+esc(g.group)+'</h3>'+g.items.map(x=>'<label><input type="checkbox" data-n="'+esc(x)+'" '+(pk.includes(x)?'checked':'')+'> '+esc(x)+'</label>').join('')+'</div>').join('');
@@ -58,65 +58,69 @@ budget(){
   '<div class="card" style="margin-top:14px"><h3>Expenses</h3><div class="tw"><table><tr><th>What</th><th>Category</th><th class="r">Amount</th></tr>'+B.map(b=>'<tr><td>'+esc(b.label)+(b.only?'<div class="muted" style="font-size:.78rem">charged to '+esc(b.only.join(', '))+' only</div>':(b.exclude&&b.exclude.length?'<div class="muted" style="font-size:.78rem">split '+(n-b.exclude.length)+' ways, not '+esc(b.exclude.join(', '))+'</div>':''))+'</td><td>'+esc(b.cat)+'</td><td class="r">'+money(b.amount)+'</td></tr>').join('')+'<tr><td colspan="2"><b>Total</b></td><td class="r"><b>'+money(total)+'</b></td></tr></table></div></div>'+
   '</section>';
 },
-mafia(){
-  const names=ppl.map(p=>p.name);
-  const ROLES={
-    mafia:{n:'Mafia',e:'🔪',t:'Night: silently agree with the other mafia on one person to eliminate. Day: blend in, lie well, and point at someone else.'},
-    doctor:{n:'Doctor',e:'🩺',t:'Night: secretly pick one person to save. If the mafia chose them, they survive. You may save yourself.'},
-    detective:{n:'Detective',e:'🕵️',t:'Night: secretly point at someone and the narrator tells you if they are mafia (thumbs up or down). Use it wisely.'},
-    villager:{n:'Villager',e:'🧑‍🌾',t:'No special power. Talk, watch everyone, and vote out the mafia in the daytime.'},
-    narrator:{n:'Narrator',e:'🎙️',t:'You run the game: guide the nights, announce what happened and keep every secret.'}};
-  const st={narr:false,mafia:2,doctor:true,detective:true};
-  let deal=null,idx=0,shown=false,all=false;
-  const players=()=>st.narr?names.length-1:names.length;
-  const defMafia=()=>Math.max(1,Math.floor(players()/3));
-  st.mafia=defMafia();
-  const comp=()=>{const p=players(),sp=st.mafia+(st.doctor?1:0)+(st.detective?1:0);return{p,sp,v:p-sp}};
+imposter(){
+  const names=ppl.map(p=>p.name),CATS=[...new Set(WORDS.map(w=>w.c))];
+  let S;try{S=JSON.parse(localStorage.getItem('goa-imposter'))}catch(e){}
+  S=S&&S.pts&&S.hist?S:{pts:{},hist:[],impWins:0,inWins:0};
+  names.forEach(n=>{if(!(n in S.pts))S.pts[n]=0});
+  const save=()=>{try{localStorage.setItem('goa-imposter',JSON.stringify(S))}catch(e){}};
+  const cfg={play:new Set(names),cats:new Set(CATS),clue:true};
+  let R=null,deck=[],last={imp:null,word:null},tmin=3,left=180,tid=null;
   const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=crypto.getRandomValues(new Uint32Array(1))[0]%(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
-  const script=()=>{const s=['Everyone closes their eyes.','Mafia, open your eyes. Silently point at who to eliminate. Mafia, close your eyes.'];
-    if(st.doctor)s.push('Doctor, open your eyes. Point at who to save. Doctor, close your eyes.');
-    if(st.detective)s.push('Detective, open your eyes. Point at who you suspect. Narrator answers with a thumbs up (mafia) or down. Detective, close your eyes.');
-    s.push('Everyone opens their eyes. Announce who was eliminated (or that nobody was, if the doctor saved them).');return s};
-  const mm=sec=>String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
-  let tmin=3,left=180,tid=null;
+  const mm=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  const pickWord=()=>{const ok=w=>cfg.cats.has(w.c);deck=deck.filter(ok);if(!deck.length)deck=shuffle(WORDS.filter(ok));
+    let w=deck.pop();if(w.w===last.word&&deck.length)w=deck.pop();return w};
+  const start=()=>{const pl=names.filter(n=>cfg.play.has(n));
+    const pool=pl.length>2?pl.filter(n=>n!==last.imp):pl,imp=pool[crypto.getRandomValues(new Uint32Array(1))[0]%pool.length];
+    const word=pickWord();last={imp,word:word.w};clearInterval(tid);tid=null;left=tmin*60;
+    R={word,imp,order:shuffle(pl),idx:0,shown:false,phase:'pass',res:null}};
+  const record=win=>{const inn=R.order.filter(n=>n!==R.imp);
+    if(win==='imp'){S.pts[R.imp]=(S.pts[R.imp]||0)+2;S.impWins++}else{inn.forEach(n=>S.pts[n]=(S.pts[n]||0)+1);S.inWins++}
+    S.hist.push({n:S.hist.length+1,imp:R.imp,word:R.word.w,win});save();R.res=win;R.phase='done'};
   const draw=()=>{
-    const c=comp(),ok=c.v>=1&&c.v>=c.sp-st.mafia-(st.doctor?0:0)&&c.p>=3;
-    const comps=[st.mafia+' Mafia',st.doctor?'1 Doctor':null,st.detective?'1 Detective':null,c.v+' Villager'+(c.v===1?'':'s')].filter(Boolean).join(', ');
-    let dealHtml;
-    if(!deal)dealHtml='<p class="muted">Pass the phone around: each person taps to see their role in secret, then hides it before passing on.</p><button class="btn2" data-act="deal"'+(c.v<1?' disabled':'')+'>🎲 Deal roles</button>';
-    else if(idx<deal.assign.length){const a=deal.assign[idx],r=ROLES[a.role];
-      dealHtml=shown?'<div class="rolecard"><div class="re">'+r.e+'</div><h3>'+esc(r.n)+'</h3><p>'+esc(r.t)+'</p></div><p class="muted" style="margin:10px 0">Memorise it, then hide it before passing the phone.</p><button class="btn2" data-act="hide">Got it, hide & pass</button>'
-        :'<p style="font-size:1.2rem">Pass the phone to <b>'+esc(a.name)+'</b></p><p class="muted" style="margin:6px 0 12px">('+(idx+1)+' of '+deal.assign.length+') Make sure nobody else is looking.</p><button class="btn2" data-act="show">👀 I am '+esc(a.name)+', show my role</button>'}
-    else dealHtml='<p style="font-size:1.1rem"><b>All roles dealt.</b>'+(deal.narr?' Narrator: <b>'+esc(deal.narr)+'</b>, take the phone.':' Put the phone down and start the night.')+'</p>'+(all?'<div style="margin:10px 0">'+deal.assign.map(a=>'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:2px dashed var(--bd)"><b>'+esc(a.name)+'</b><span>'+ROLES[a.role].e+' '+esc(ROLES[a.role].n)+'</span></div>').join('')+'</div>':'')+'<button class="btn2" data-act="all">'+(all?'Hide all roles':(deal.narr?'🔒 Narrator view: show everyone\'s role':'🔒 Reveal everyone\'s role (spoilers!)'))+'</button> <button class="btn2 alt" data-act="reset">New deal</button>';
-    const step=(k,l,v,mx,mn)=>'<div class="stp"><span>'+l+'</span><button data-act="dec" data-k="'+k+'">−</button><b>'+v+'</b><button data-act="inc" data-k="'+k+'">+</button></div>';
-    $('#app').innerHTML=head('Maafia Night 🕵️','Villagers vs mafia. Trust no one.')+'<section class="wrap">'+
-    '<div class="card"><h3>📜 How it works</h3><ul style="margin-left:18px"><li>Everyone gets a secret role: <b>Mafia</b>, <b>Villager</b>, or a special like <b>Doctor</b> or <b>Detective</b>.</li><li><b>Night:</b> everyone shuts their eyes. The narrator wakes the mafia to pick a victim, then the Doctor and Detective do their thing.</li><li><b>Day:</b> the narrator says who was eliminated. Everyone argues, accuses and votes someone out.</li><li><b>Villagers win</b> when every mafia is out. <b>Mafia win</b> when they equal or outnumber the rest.</li></ul></div>'+
-    '<div class="card" style="margin-top:18px"><h3>⚙️ Set up the game</h3><label class="chk"><input type="checkbox" data-act="narr" '+(st.narr?'checked':'')+'> One of us narrates (that person does not play). Leave off so all '+names.length+' play.</label>'+
-    step('mafia','Mafia',st.mafia)+'<label class="chk"><input type="checkbox" data-act="doctor" '+(st.doctor?'checked':'')+'> Doctor</label><label class="chk"><input type="checkbox" data-act="detective" '+(st.detective?'checked':'')+'> Detective</label>'+
-    '<div class="note">'+c.p+' players: '+esc(comps)+'.'+(c.v<1?' Too many special roles, lower something.':'')+(st.mafia*2>=c.p?' That is a lot of mafia, the game may end fast.':'')+'</div></div>'+
-    '<div class="card" style="margin-top:18px"><h3>🎲 Deal roles</h3>'+dealHtml+'</div>'+
-    '<div class="card" style="margin-top:18px"><h3>🎙️ Narrator script (each night)</h3><ol style="margin-left:20px">'+script().map(x=>'<li style="margin:4px 0">'+esc(x)+'</li>').join('')+'</ol><p class="muted" style="margin-top:8px">Then the day: everyone discusses, votes, and the person with the most votes is out. Repeat until someone wins.</p></div>'+
-    '<div class="card" style="margin-top:18px"><h3>⏱️ Discussion timer</h3><div class="big" id="tm">'+mm(left)+'</div><div style="margin:8px 0">'+[1,2,3,5].map(m=>'<button class="chip'+(m===tmin?' on':'')+'" data-act="tmin" data-m="'+m+'">'+m+' min</button>').join('')+'</div><button class="btn2" data-act="tstart">'+(tid?'Pause':'Start')+'</button> <button class="btn2 alt" data-act="treset">Reset</button></div></section>';
+    const np=cfg.play.size;let top='';
+    if(!R){
+      top='<div class="card"><h3>⚙️ Set up</h3><p class="muted" style="margin-bottom:6px">Who is playing?</p>'+names.map(n=>'<button class="chip'+(cfg.play.has(n)?' on':'')+'" data-act="pl" data-n="'+esc(n)+'">'+esc(n)+'</button>').join('')+
+      '<p class="muted" style="margin:12px 0 6px">Word categories</p>'+CATS.map(c=>'<button class="chip'+(cfg.cats.has(c)?' on':'')+'" data-act="cat" data-c="'+esc(c)+'">'+esc(c)+'</button>').join('')+
+      '<label class="chk" style="margin-top:12px"><input type="checkbox" data-act="clue" '+(cfg.clue?'checked':'')+'> Imposter gets a clue (off = category only, harder)</label>'+
+      '<button class="btn2" data-act="start"'+(np<3||!cfg.cats.size?' disabled':'')+'>🎲 Start round</button>'+(np<3?'<span class="muted"> Need at least 3 players.</span>':'')+'</div>';
+    }else if(R.phase==='pass'){
+      const n=R.order[R.idx],isImp=n===R.imp;
+      top='<div class="card"><h3>Round '+(S.hist.length+1)+': pass the phone</h3>'+(R.shown?
+        '<div class="rolecard">'+(isImp?'<div class="re">🕵️</div><h3>You are the imposter</h3><p>Category: <b>'+esc(R.word.c)+'</b></p>'+(cfg.clue?'<p style="margin-top:6px">Clue: '+esc(R.word.h)+'</p>':'')+'<p style="margin-top:10px;color:var(--lime)">Blend in. Do not get caught.</p>':'<div class="re">🔤</div><p>Category: <b>'+esc(R.word.c)+'</b></p><h3 style="font-size:2.4rem;margin-top:6px">'+esc(R.word.w)+'</h3><p style="margin-top:10px;color:var(--lime)">Do not say it out loud.</p>')+'</div><p class="muted" style="margin:10px 0">Memorise it, then hide it before passing.</p><button class="btn2" data-act="hide">Got it, hide &amp; pass</button>'
+        :'<p style="font-size:1.25rem">Pass the phone to <b>'+esc(n)+'</b></p><p class="muted" style="margin:6px 0 12px">('+(R.idx+1)+' of '+R.order.length+') Make sure nobody else is looking.</p><button class="btn2" data-act="show">👀 I am '+esc(n)+', show it</button>')+'</div>';
+    }else if(R.phase==='debate'){
+      top='<div class="card"><h3>🗣️ Debate time</h3><p>Everyone has seen their card. Take turns describing the word <b>without saying it</b>, then vote for who you think the imposter is.</p><div class="big" id="tm" style="margin-top:10px">'+mm(left)+'</div><div style="margin:8px 0">'+[1,2,3,5].map(m=>'<button class="chip'+(m===tmin?' on':'')+'" data-act="tmin" data-m="'+m+'">'+m+' min</button>').join('')+'</div><button class="btn2" data-act="tstart">'+(tid?'Pause':'Start timer')+'</button> <button class="btn2 alt" data-act="treset">Reset</button><hr style="border:0;border-top:2px dashed var(--bd);margin:14px 0"><p class="muted" style="margin-bottom:8px">Voted? Reveal the truth.</p><button class="btn2" data-act="reveal">🎭 Reveal imposter &amp; word</button></div>';
+    }else if(R.phase==='reveal'){
+      top='<div class="card"><h3>🎭 The reveal</h3><p style="font-size:1.2rem">The imposter was <b>'+esc(R.imp)+'</b>.</p><p style="font-size:1.2rem;margin-top:4px">The word was <b>'+esc(R.word.w)+'</b> <span class="muted">('+esc(R.word.c)+')</span>.</p><p style="margin:14px 0 8px;font-weight:800">Who won this round?</p><button class="btn2" data-act="win" data-w="inn">🧑‍🤝‍🧑 Innocents won</button> <button class="btn2 alt" data-act="win" data-w="imp">🕵️ Imposter won</button></div>';
+    }else{
+      top='<div class="card"><h3>'+(R.res==='imp'?'🕵️ Imposter wins!':'🧑‍🤝‍🧑 Innocents win!')+'</h3><p>'+(R.res==='imp'?esc(R.imp)+' fooled everyone (+2 points).':'They caught '+esc(R.imp)+' (+1 point each).')+'</p><p class="muted" style="margin:6px 0 12px">The word was '+esc(R.word.w)+'.</p><button class="btn2" data-act="start">▶️ Next round (new word)</button> <button class="btn2 alt" data-act="setup">Change players / categories</button></div>';
+    }
+    const rows=names.slice().sort((a,b)=>(S.pts[b]||0)-(S.pts[a]||0));
+    const board='<div class="card" style="margin-top:18px"><h3>🏆 Scoreboard</h3><div class="grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div style="border:3px solid var(--bd);border-radius:12px;padding:8px;text-align:center;background:var(--cyan);color:#111"><div class="big">'+S.inWins+'</div>Innocent wins</div><div style="border:3px solid var(--bd);border-radius:12px;padding:8px;text-align:center;background:var(--yellow);color:#111"><div class="big">'+S.impWins+'</div>Imposter wins</div></div>'+
+      rows.map(n=>'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:2px dashed var(--bd)"><b>'+esc(n)+'</b><b>'+(S.pts[n]||0)+' pts</b></div>').join('')+
+      '<p class="muted" style="font-size:.8rem;margin-top:8px">Innocents who catch the imposter get 1 point each. An imposter who wins gets 2. Scores are saved on this device.</p>'+
+      (S.hist.length?'<h3 style="margin-top:14px;font-size:1.1rem">Round history</h3>'+S.hist.slice().reverse().slice(0,12).map(h=>'<div style="padding:4px 0">Round '+h.n+': <b>'+esc(h.imp)+'</b> was the imposter ('+esc(h.word)+') &rarr; <b>'+(h.win==='imp'?'Imposter won':'Innocents won')+'</b></div>').join(''):'')+
+      '<button class="btn2 alt" data-act="resetscores" style="margin-top:12px">Reset scores</button></div>';
+    $('#app').innerHTML=head('Imposter 🕵️','Same word for everyone. Except one.')+'<section class="wrap">'+top+board+'</section>';
   };
   $('#app').addEventListener('click',e=>{
-    const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
-    if(b.type==='checkbox')return;
-    if(a==='deal'){const pl=shuffle(names),nr=st.narr?pl[0]:null,rest=st.narr?pl.slice(1):pl;
-      const roles=[...Array(st.mafia).fill('mafia'),...(st.doctor?['doctor']:[]),...(st.detective?['detective']:[]),...Array(Math.max(0,rest.length-st.mafia-(st.doctor?1:0)-(st.detective?1:0))).fill('villager')];
-      const rr=shuffle(roles);deal={narr:nr,assign:rest.map((n,i)=>({name:n,role:rr[i]}))};idx=0;shown=false;all=false}
-    else if(a==='show')shown=true;
-    else if(a==='hide'){shown=false;idx++}
-    else if(a==='all')all=!all;
-    else if(a==='reset'){deal=null;idx=0;shown=false;all=false}
-    else if(a==='inc'||a==='dec'){st.mafia=Math.max(1,Math.min(Math.max(1,players()-1),st.mafia+(a==='inc'?1:-1)));deal=null}
+    const b=e.target.closest('[data-act]');if(!b||b.type==='checkbox')return;const a=b.dataset.act;
+    if(a==='pl'){const n=b.dataset.n;cfg.play.has(n)?cfg.play.delete(n):cfg.play.add(n)}
+    else if(a==='cat'){const c=b.dataset.c;cfg.cats.has(c)?cfg.cats.delete(c):cfg.cats.add(c)}
+    else if(a==='start'){if(b.disabled)return;start()}
+    else if(a==='setup'){R=null}
+    else if(a==='show')R.shown=true;
+    else if(a==='hide'){R.shown=false;R.idx++;if(R.idx>=R.order.length)R.phase='debate'}
+    else if(a==='reveal'){clearInterval(tid);tid=null;R.phase='reveal'}
+    else if(a==='win')record(b.dataset.w)
+    else if(a==='resetscores'){if(confirm('Reset all scores and history?')){S={pts:Object.fromEntries(names.map(n=>[n,0])),hist:[],impWins:0,inWins:0};save()}}
     else if(a==='tmin'){tmin=+b.dataset.m;left=tmin*60;clearInterval(tid);tid=null}
     else if(a==='treset'){left=tmin*60;clearInterval(tid);tid=null}
     else if(a==='tstart'){if(tid){clearInterval(tid);tid=null}else{if(left<=0)left=tmin*60;tid=setInterval(()=>{left--;const t=document.getElementById('tm');if(t)t.textContent=mm(Math.max(left,0));if(left<=0){clearInterval(tid);tid=null;try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(x){}draw()}},1000)}}
     draw();
   });
-  $('#app').addEventListener('change',e=>{const a=e.target.dataset.act;if(!a)return;
-    if(a==='narr'){st.narr=e.target.checked;st.mafia=defMafia()}else if(a==='doctor')st.doctor=e.target.checked;else if(a==='detective')st.detective=e.target.checked;
-    deal=null;draw()});
+  $('#app').addEventListener('change',e=>{if(e.target.dataset.act==='clue'){cfg.clue=e.target.checked;draw()}});
   draw();
 },
 gallery(){
