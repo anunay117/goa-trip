@@ -66,7 +66,7 @@ mafia(){
     detective:{n:'Detective',e:'🕵️',t:'Night: secretly point at someone and the narrator tells you if they are mafia (thumbs up or down). Use it wisely.'},
     villager:{n:'Villager',e:'🧑‍🌾',t:'No special power. Talk, watch everyone, and vote out the mafia in the daytime.'},
     narrator:{n:'Narrator',e:'🎙️',t:'You run the game: guide the nights, announce what happened and keep every secret.'}};
-  const st={narr:true,mafia:2,doctor:true,detective:true};
+  const st={narr:false,mafia:2,doctor:true,detective:true};
   let deal=null,idx=0,shown=false,all=false;
   const players=()=>st.narr?names.length-1:names.length;
   const defMafia=()=>Math.max(1,Math.floor(players()/3));
@@ -87,11 +87,11 @@ mafia(){
     else if(idx<deal.assign.length){const a=deal.assign[idx],r=ROLES[a.role];
       dealHtml=shown?'<div class="rolecard"><div class="re">'+r.e+'</div><h3>'+esc(r.n)+'</h3><p>'+esc(r.t)+'</p></div><p class="muted" style="margin:10px 0">Memorise it, then hide it before passing the phone.</p><button class="btn2" data-act="hide">Got it, hide & pass</button>'
         :'<p style="font-size:1.2rem">Pass the phone to <b>'+esc(a.name)+'</b></p><p class="muted" style="margin:6px 0 12px">('+(idx+1)+' of '+deal.assign.length+') Make sure nobody else is looking.</p><button class="btn2" data-act="show">👀 I am '+esc(a.name)+', show my role</button>'}
-    else dealHtml='<p style="font-size:1.1rem"><b>All roles dealt.</b>'+(deal.narr?' Narrator: <b>'+esc(deal.narr)+'</b>, take the phone.':'')+'</p>'+(all?'<div style="margin:10px 0">'+deal.assign.map(a=>'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:2px dashed var(--bd)"><b>'+esc(a.name)+'</b><span>'+ROLES[a.role].e+' '+esc(ROLES[a.role].n)+'</span></div>').join('')+'</div>':'')+'<button class="btn2" data-act="all">'+(all?'Hide all roles':'🔒 Narrator view: show everyone\'s role')+'</button> <button class="btn2 alt" data-act="reset">New deal</button>';
+    else dealHtml='<p style="font-size:1.1rem"><b>All roles dealt.</b>'+(deal.narr?' Narrator: <b>'+esc(deal.narr)+'</b>, take the phone.':' Put the phone down and start the night.')+'</p>'+(all?'<div style="margin:10px 0">'+deal.assign.map(a=>'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:2px dashed var(--bd)"><b>'+esc(a.name)+'</b><span>'+ROLES[a.role].e+' '+esc(ROLES[a.role].n)+'</span></div>').join('')+'</div>':'')+'<button class="btn2" data-act="all">'+(all?'Hide all roles':(deal.narr?'🔒 Narrator view: show everyone\'s role':'🔒 Reveal everyone\'s role (spoilers!)'))+'</button> <button class="btn2 alt" data-act="reset">New deal</button>';
     const step=(k,l,v,mx,mn)=>'<div class="stp"><span>'+l+'</span><button data-act="dec" data-k="'+k+'">−</button><b>'+v+'</b><button data-act="inc" data-k="'+k+'">+</button></div>';
     $('#app').innerHTML=head('Maafia Night 🕵️','Villagers vs mafia. Trust no one.')+'<section class="wrap">'+
     '<div class="card"><h3>📜 How it works</h3><ul style="margin-left:18px"><li>Everyone gets a secret role: <b>Mafia</b>, <b>Villager</b>, or a special like <b>Doctor</b> or <b>Detective</b>.</li><li><b>Night:</b> everyone shuts their eyes. The narrator wakes the mafia to pick a victim, then the Doctor and Detective do their thing.</li><li><b>Day:</b> the narrator says who was eliminated. Everyone argues, accuses and votes someone out.</li><li><b>Villagers win</b> when every mafia is out. <b>Mafia win</b> when they equal or outnumber the rest.</li></ul></div>'+
-    '<div class="card" style="margin-top:18px"><h3>⚙️ Set up the game</h3><label class="chk"><input type="checkbox" data-act="narr" '+(st.narr?'checked':'')+'> One of us narrates (that person does not play)</label>'+
+    '<div class="card" style="margin-top:18px"><h3>⚙️ Set up the game</h3><label class="chk"><input type="checkbox" data-act="narr" '+(st.narr?'checked':'')+'> One of us narrates (that person does not play). Leave off so all '+names.length+' play.</label>'+
     step('mafia','Mafia',st.mafia)+'<label class="chk"><input type="checkbox" data-act="doctor" '+(st.doctor?'checked':'')+'> Doctor</label><label class="chk"><input type="checkbox" data-act="detective" '+(st.detective?'checked':'')+'> Detective</label>'+
     '<div class="note">'+c.p+' players: '+esc(comps)+'.'+(c.v<1?' Too many special roles, lower something.':'')+(st.mafia*2>=c.p?' That is a lot of mafia, the game may end fast.':'')+'</div></div>'+
     '<div class="card" style="margin-top:18px"><h3>🎲 Deal roles</h3>'+dealHtml+'</div>'+
