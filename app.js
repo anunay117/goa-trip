@@ -4,12 +4,12 @@ const money=n=>TRIP.currency+Math.round(n).toLocaleString('en-IN');
 const parse=d=>new Date(d+'T00:00:00');
 const fmt=(d,o)=>d.toLocaleDateString('en-IN',o||{weekday:'short',day:'numeric',month:'short'});
 const ppl=TRIP.crew.filter(c=>!c.infant);
-const PAGES=[['index.html','Home','home'],['itinerary.html','The Plan','itinerary'],['crew.html','The Squad','crew'],['stay.html','The Crib','stay'],['ride.html','The Whip','ride'],['budget.html','The Damage','budget'],['imposter.html','Imposter','imposter'],['gallery.html','Core Memories','gallery']];
+const PAGES=[['index.html','Home','home'],['itinerary.html','The Plan','itinerary'],['crew.html','The Squad','crew'],['stay.html','The Crib','stay'],['ride.html','The Whip','ride'],['budget.html','The Damage','budget'],['playlists.html','Aux Cord','playlists'],['imposter.html','Imposter','imposter'],['gallery.html','Core Memories','gallery']];
 const page=document.body.dataset.page;
 document.title=(page==='home'?'':PAGES.find(p=>p[2]===page)[1]+' | ')+TRIP.name;
 document.body.insertAdjacentHTML('afterbegin','<nav><div class="wrap"><a class="logo" href="index.html">🌴 '+esc(TRIP.name)+'</a>'+PAGES.map(p=>'<a class="l'+(p[2]===page?' on':'')+'" href="'+p[0]+'">'+p[1]+'</a>').join('')+'<button class="mbtn" id="mbtn" aria-expanded="false" aria-controls="menu">☰ Menu</button></div></nav><div class="mq"><div>'+Array(8).join('<span>'+esc(TRIP.name)+' ✦ '+ppl.length+' BESTIES ✦ NO CAP ✦ OUT OF OFFICE ✦ </span>')+Array(8).join('<span>'+esc(TRIP.name)+' ✦ '+ppl.length+' BESTIES ✦ NO CAP ✦ OUT OF OFFICE ✦ </span>')+'</div></div>');
 document.body.insertAdjacentHTML('beforeend','<footer>Made with ☀️ and zero sleep by the squad · '+esc(TRIP.name)+'</footer>');
-const MEM={home:'🏠',itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',imposter:'🕵️',gallery:'📸'};
+const MEM={playlists:'🎧',home:'🏠',itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',imposter:'🕵️',playlists:'🎧',gallery:'📸'};
 document.body.insertAdjacentHTML('beforeend','<div id="menu" class="menu" role="dialog" aria-label="Site menu"><div class="panel"><div class="mh"><b>Where to?</b><button id="mclose">✕ Close</button></div><div class="mg">'+PAGES.map(p=>'<a href="'+p[0]+'" class="'+(p[2]===page?'cur':'')+'"><span>'+(MEM[p[2]]||'•')+'</span>'+p[1]+(p[2]===page?'<small>you are here</small>':'')+'</a>').join('')+'</div></div></div>');
 (function(){const m=document.getElementById('menu'),b=document.getElementById('mbtn');
   const set=o=>{m.classList.toggle('on',o);b.setAttribute('aria-expanded',o);document.body.style.overflow=o?'hidden':''};
@@ -21,6 +21,7 @@ const head=(t,s)=>'<div class="ph wrap"><h1>'+t+'</h1><p>'+s+'</p></div>';
 const days=()=>{const s=parse(TRIP.start);return TRIP.itinerary.map((d,i)=>({...d,date:new Date(s.getTime()+i*864e5)}))};
 const nights=Math.max(1,Math.round((parse(TRIP.end)-parse(TRIP.start))/864e5));
 const flightsHtml=()=>!(TRIP.flights&&TRIP.flights.length)?'':'<div class="card" style="margin-bottom:18px"><h3>✈️ Flights (we are SO back)</h3>'+TRIP.flights.map(f=>'<div class="it" style="grid-template-columns:100px 1fr"><time>'+fmt(parse(f.date))+'</time><div><b>'+esc(f.airline)+' '+esc(f.no)+'</b> · '+esc(f.who)+'<div>'+esc(f.from)+' <b>'+esc(f.dep)+'</b> → '+esc(f.to)+' <b>'+esc(f.arr)+'</b> <span class="muted">('+esc(f.dur)+')</span></div>'+(f.note?'<div class="muted" style="font-size:.85rem">'+esc(f.note)+'</div>':'')+'</div></div>').join('')+'</div>';
+const plCard=p=>'<div class="card pl"><div class="ple">'+p.emoji+'</div><h3>'+esc(p.name)+'</h3><span class="tag">'+esc(p.lang)+'</span><p class="muted" style="margin:8px 0 12px">'+esc(p.vibe)+'</p><div class="pbtns"><a class="pbtn sp" href="https://open.spotify.com/playlist/'+esc(p.sp)+'" target="_blank" rel="noopener">▶ Spotify</a><a class="pbtn ytm" href="https://music.youtube.com/playlist?list='+esc(p.yt)+'" target="_blank" rel="noopener">▶ YouTube Music</a></div><details><summary>Which playlists?</summary><p class="muted" style="font-size:.8rem;margin-top:4px">Spotify: '+esc(p.spName)+'<br>YouTube: '+esc(p.ytName)+'</p></details></div>';
 const R={
 home(){
   const s=parse(TRIP.start),e=parse(TRIP.end),w=TRIP.weather;
@@ -31,6 +32,7 @@ home(){
   $('#app').innerHTML='<header class="hero"><div class="wrap"><h1><span>out of office</span></h1><p>'+esc(TRIP.tagline)+'</p><div><span class="stk">'+fmt(s,{day:'numeric',month:'short'})+' → '+fmt(e,{day:'numeric',month:'short'})+'</span><span class="stk">'+ppl.length+' besties</span><span class="stk">'+nights+' nights</span><span class="stk">no cap</span></div><div class="cd" id="cd"></div></div></header>'+
   '<section class="wrap"><div class="grid">'+tiles+'</div></section>'+
   '<section class="wrap"><div class="card" style="background:var(--yellow);color:#111"><h2>☀️ Goa in December</h2><p style="margin-top:6px;font-weight:600">Dry, sunny and hot in the day, chill at night. Pack for beach weather, not rain.</p><div class="wx"><div><b>'+esc(w.hi)+'</b><span>Day high</span></div><div><b>'+esc(w.lo)+'</b><span>Night low</span></div><div><b>'+esc(w.sea)+'</b><span>Sea temp</span></div><div><b>'+esc(w.rain)+'</b><span>Rainy days</span></div><div><b>'+esc(w.sun)+'</b><span>Sun daily</span></div></div><p style="margin-top:12px;font-weight:600">'+esc(w.note)+'</p></div></section>'+
+  '<section class="wrap"><h2 style="text-transform:uppercase;font-size:2.2rem">🎧 Car playlists</h2><p class="muted" style="margin:6px 0 4px;font-weight:600">Aux cord sorted. Pick a vibe and open it in Spotify or YouTube Music.</p><div class="plgrid">'+TRIP.playlists.map(plCard).join('')+'</div></section>'+
   '<section class="wrap"><h2 style="text-transform:uppercase;font-size:2.2rem">🎒 Packing list</h2><p class="muted" style="margin-top:6px;font-weight:600">Built for Goa weather. Ticks are saved on this device only.</p><div class="pk">'+groups+'</div><div class="skip"><b>Leave at home:</b> '+TRIP.skip.map(esc).join(' · ')+'</div></section>';
   document.querySelectorAll('.check input').forEach(c=>c.onchange=()=>{const a=[...document.querySelectorAll('.check input:checked')].map(x=>x.dataset.n);try{localStorage.setItem('goa-pack2',JSON.stringify(a))}catch(x){}});
   const tick=()=>{const now=new Date();let ms=s-now,label='until we leave';if(ms<=0){ms=e-now+864e5;label=ms>0?'left of the trip':'';}
@@ -65,6 +67,9 @@ budget(){
   '<div class="card" style="margin-top:14px"><h3>By category</h3>'+Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<div style="margin:10px 0"><div style="display:flex;justify-content:space-between"><span>'+esc(k)+'</span><b>'+money(v)+'</b></div><div class="bar"><i style="width:'+v/mx*100+'%"></i></div></div>').join('')+'</div>'+
   '<div class="card" style="margin-top:14px"><h3>Expenses</h3><div class="tw"><table><tr><th>What</th><th>Category</th><th class="r">Amount</th></tr>'+B.map(b=>'<tr><td>'+esc(b.label)+(b.only?'<div class="muted" style="font-size:.78rem">charged to '+esc(b.only.join(', '))+' only</div>':(b.exclude&&b.exclude.length?'<div class="muted" style="font-size:.78rem">split '+(n-b.exclude.length)+' ways, not '+esc(b.exclude.join(', '))+'</div>':''))+'</td><td>'+esc(b.cat)+'</td><td class="r">'+money(b.amount)+'</td></tr>').join('')+'<tr><td colspan="2"><b>Total</b></td><td class="r"><b>'+money(total)+'</b></td></tr></table></div></div>'+
   '</section>';
+},
+playlists(){
+  $('#app').innerHTML=head('Aux Cord 🎧','Whoever drives controls the vibe. Pick one.')+'<section class="wrap"><div class="plgrid">'+TRIP.playlists.map(plCard).join('')+'</div><p class="muted" style="font-size:.85rem;margin-top:18px">These are public playlists made by other people on Spotify and YouTube, so their songs can change over time. You may need to sign in to play full tracks. YouTube Music plays the playlist\'s music videos.</p></section>';
 },
 imposter(){
   const names=ppl.map(p=>p.name),CATS=[...new Set(WORDS.map(w=>w.c))];

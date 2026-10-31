@@ -100,6 +100,28 @@ const TRIP = {
   ],
   skip: ["Heavy jacket or sweater", "Umbrella or raincoat (monsoon is long gone)", "Jeans for every day (too hot and slow to dry)"],
 
+  // Car playlists. "sp" = Spotify playlist id, "yt" = YouTube playlist id (opens in YouTube Music). All links were checked on 31 Oct 2026.
+  playlists: [
+    { name: "Highway Hindi",        emoji: "🚗", lang: "Hindi",         vibe: "Bollywood road-trip hits for the long drive",
+      sp: "02d3dszOlM4I9ZQAajDVbv", spName: "Highway road trip Hindi songs",
+      yt: "PLQdfb6nEJz_X-0Tkwec2N2Sj83d_DM36d", ytName: "Top 100 Travel Songs of Bollywood" },
+    { name: "Sing-Along Roadtrip",  emoji: "🎸", lang: "English",       vibe: "Classics everyone knows the words to",
+      sp: "68q3IjJ17gHA7r9NdijiUU", spName: "Road Trip Songs: The Ultimate Throwback Playlist",
+      yt: "PLNjVKDn-Jmf6VtU8oto01VwRQvDrhJFGf", ytName: "Roadtrip songs everyone knows" },
+    { name: "Beach & Sunset Chill", emoji: "🌴", lang: "English / chill", vibe: "Tropical, laid-back, golden hour",
+      sp: "5Yk5sbKKHlxKbuyiBSPoyR", spName: "Sunset Beats, Island Chill, Beach Vibes",
+      yt: "PLNjVKDn-Jmf6Kf7GBrg_1JPcLbTfaKLXj", ytName: "Beach Music: Summer Vibes 2026" },
+    { name: "Bollywood Party",      emoji: "🎉", lang: "Hindi",         vibe: "Dance-in-your-seat Goa party songs",
+      sp: "21pf3g03K0dcNM6nq79rb2", spName: "GOA - party songs (Bollywood)",
+      yt: "PLyJ-hYl35pVK6m7HqSM0P6bUxpZBvrnpC", ytName: "Desi Bollywood songs to dance to at 3 am" },
+    { name: "English Party",        emoji: "🕺", lang: "English",       vibe: "Big party anthems and recent hits",
+      sp: "5xS3Gi0fA3Uo6RScucyct6", spName: "Party Songs 2010-2026 Hits",
+      yt: "PLO7-VO1D0_6N2ePPlPE9NKCgUBA15aOk2", ytName: "English Songs 2026: Trending" },
+    { name: "Hindi Rap",            emoji: "🎤", lang: "Hindi",         vibe: "Desi hip-hop for the back seat",
+      sp: "572Hmii6eSuDai46ZJXgIe", spName: "The Sound of Hindi Hip Hop (by Spotify)",
+      yt: "PLJtpjlkBVF4wneUJqC9SZPhBiEBQmmEsi", ytName: "Top Hindi Rap Songs of All Time" }
+  ],
+
   photos: [                       // drop images in the photos/ folder, then list them here
     // { src: "photos/beach.jpg", caption: "Sunset at Vagator" },
   ]
