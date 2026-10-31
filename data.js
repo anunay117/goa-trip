@@ -117,7 +117,7 @@ const TRIP = {
     { name: "English Party",        emoji: "🕺", lang: "English",       vibe: "Big party anthems and recent hits",
       sp: "5xS3Gi0fA3Uo6RScucyct6", spName: "Party Songs 2010-2026 Hits",
       yt: "PLO7-VO1D0_6N2ePPlPE9NKCgUBA15aOk2", ytName: "English Songs 2026: Trending" },
-    { name: "English Hits India",   emoji: "🇮🇳", lang: "English",       vibe: "The English songs Indians stream the most",
+    { name: "English Hits",         emoji: "🇮🇳", lang: "English",       vibe: "The English songs Indians stream the most",
       sp: "2cXI31t2XnElhPLj7aVJlD", spName: "Most Popular English Songs (India)",
       yt: "PLOfGUSnj9XxQuiy8B50WGfvMUmAITKC0B", ytName: "Best English Songs (a general hits list, not India-specific)" },
     { name: "Hindi Rap",            emoji: "🎤", lang: "Hindi",         vibe: "Desi hip-hop for the back seat",
