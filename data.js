@@ -88,6 +88,10 @@ const TRIP = {
     { label: "Food & drinks (estimate)",                  amount: 50000, group: "Food & drinks", est: true },
     { label: "Attractions & general expenses (estimate)", amount: 20000, group: "Attractions & general", est: true }
   ],
+  // Costs that are not in the shared plan (shown as a note, no amount yet).
+  otherCosts: [
+    { who: "Deepak", label: "Deepak's flight (booked separately)", note: "Indigo ka Dalal" }
+  ],
   groupCats: { "Car & petrol": ["Travel"], "Food & drinks": ["Food", "Drinks"], "Attractions & general": ["Activity", "Shopping", "Other", "Stay"] },
   expenseApi: "",                 // URL of the live-expense server (Cloudflare Worker); set after deploy. Trip code is NOT stored here.
 
