@@ -52,7 +52,7 @@ const TRIP = {
   stay: {                         // (SAMPLE) your Airbnb
     name: "Homero Villa",
     address: "Add the full address here",   // TODO
-    mapLink: "https://maps.google.com",
+    mapLink: "https://maps.app.goo.gl/jdEaueAeqqZHt62V7",   // Homero Villa location (shared Google Maps link)
     link: "https://www.airbnb.co.in",
     checkIn: "3:00 PM", checkOut: "11:00 AM",
     host: "Host name", hostPhone: "",
@@ -67,8 +67,7 @@ const TRIP = {
     car: "Toyota Innova Hycross (to be finalised)",
     company: "To be decided",
     phone: "",
-    pickup: "3 Dec: tap the map button below for the exact pick-up spot",
-    mapLink: "https://maps.app.goo.gl/jdEaueAeqqZHt62V7",   // pick-up location (shared Google Maps link)
+    pickup: "To be decided, 3 Dec",
     dropoff: "To be decided, 6 Dec",
     drivers: ["To be decided"],
     seats: 7, rentalTotal: 12000, fuelEstimate: 4000, deposit: 5000,   // TODO: real quote
