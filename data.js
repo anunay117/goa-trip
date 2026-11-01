@@ -76,11 +76,19 @@ const TRIP = {
   },
 
   // Budget: everything is split equally between the 6 friends (Arsi is not counted).
-  budget: [                       // Pre-trip costs already paid (real). Live daily spends are logged on The Damage page, not here.
+  budget: [                       // Pre-trip costs already paid (real). Daily spends are logged live on The Damage page, not here.
     { cat: "Stay",   label: "Homero Villa (3 nights)", amount: 28000 },
     { cat: "Travel", label: "Flights (IndiGo, Delhi-Goa-Delhi)", amount: 123135, exclude: ["Deepak"] },   // Deepak has a separate ticket
     { cat: "Travel", label: "Arsi's flight (infant fare + tax)", amount: 4000, only: ["Anunay"], short: "Arsi" }   // charged to Anunay only
   ],
+  // Still to spend. "group" rows are tracked against live logged categories (see groupCats). est = rough estimate.
+  upcoming: [
+    { label: "Car rental (4 days)",                       amount: 14000, group: "Car & petrol" },
+    { label: "Petrol (approx.)",                          amount: 3000,  group: "Car & petrol", est: true },
+    { label: "Food & drinks (estimate)",                  amount: 50000, group: "Food & drinks", est: true },
+    { label: "Attractions & general expenses (estimate)", amount: 20000, group: "Attractions & general", est: true }
+  ],
+  groupCats: { "Car & petrol": ["Travel"], "Food & drinks": ["Food", "Drinks"], "Attractions & general": ["Activity", "Shopping", "Other", "Stay"] },
   expenseApi: "",                 // URL of the live-expense server (Cloudflare Worker); set after deploy. Trip code is NOT stored here.
 
   planned: null,                  // optional: set a total target (e.g. 250000) to show a progress bar
