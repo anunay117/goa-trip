@@ -70,7 +70,7 @@ const TRIP = {
     pickup: "To be decided, 3 Dec",
     dropoff: "To be decided, 6 Dec",
     drivers: ["To be decided"],
-    seats: 7, rentalTotal: 12000, fuelEstimate: 4000, deposit: 5000,   // TODO: real quote
+    seats: 7, rentalTotal: 14600, fuelEstimate: 5000, deposit: 5000,   // TODO: real quote
     docs: ["Driving licence (original)", "Aadhaar / ID", "Booking confirmation"],
     tips: ["Take photos of the car before driving", "Keep to the speed limits, especially near beaches", "No drink-driving. Nominate a driver each night."]
   },
@@ -83,8 +83,8 @@ const TRIP = {
   ],
   // Still to spend. "group" rows are tracked against live logged categories (see groupCats). est = rough estimate.
   upcoming: [
-    { label: "Car rental (4 days)",                       amount: 14000, group: "Car & petrol" },
-    { label: "Petrol (approx.)",                          amount: 3000,  group: "Car & petrol", est: true },
+    { label: "Car rental (4 days)",                       amount: 14600, group: "Car & petrol" },
+    { label: "Petrol (approx.)",                          amount: 5000,  group: "Car & petrol", est: true },
     { label: "Food & drinks (estimate)",                  amount: 50000, group: "Food & drinks", est: true },
     { label: "Attractions & general expenses (estimate)", amount: 20000, group: "Attractions & general", est: true }
   ],
