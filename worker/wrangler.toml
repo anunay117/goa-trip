@@ -9,4 +9,7 @@ database_id = "b5b7e0ab-c0e6-4eb0-9203-4788b662ccdb"
 
 [vars]
 ALLOWED_ORIGINS = "https://anunay117.github.io"
-# TRIP_CODE is a secret (wrangler secret put TRIP_CODE), never committed.
+# Web Push sender (VAPID) public key. The matching private key is the secret VAPID_PRIVATE_JWK.
+VAPID_PUBLIC = "BC6JAZzsmcLI7HsaG4M85BQA6kiaDlmnC_ndq_LCGaW5h3G27mF4WcE9ktTB9tB8FuFQCvUKzei9D3WdjQRF0G0"
+VAPID_SUBJECT = "https://anunay117.github.io/goa-trip/"
+# Secrets (never committed): TRIP_CODE, VAPID_PRIVATE_JWK (wrangler secret put ...).

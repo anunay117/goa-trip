@@ -77,11 +77,53 @@ budget(){
     names.forEach(n=>net[n]=paid[n]-share[n]);return {net,paid,share}};
   const settle=net=>{const d=names.filter(n=>net[n]<-.5).map(n=>({n,a:-net[n]})).sort((a,b)=>b.a-a.a),c=names.filter(n=>net[n]>.5).map(n=>({n,a:net[n]})).sort((a,b)=>b.a-a.a),out=[];
     for(let i=0,j=0;i<d.length&&j<c.length;){const m=Math.min(d[i].a,c[j].a);out.push([d[i].n,c[j].n,m]);d[i].a-=m;c[j].a-=m;if(d[i].a<.5)i++;if(c[j].a<.5)j++}return out};
+  // Expense notifications (Web Push). iPhones only allow this inside the home-screen app (iOS 16.4+).
+  const PK=TRIP.pushKey||'';
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+  const canPush='serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+  let P={st:'checking',ep:'',name:lg('goa-push-name')||'',msg:'',busy:false};
+  const u8=b=>{const t=atob((b+'==='.slice((b.length+3)%4)).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(t,c=>c.charCodeAt(0))};
+  const checkPush=async()=>{
+    if(!PK||!API){P.st='none';return}
+    if(!canPush){P.st=isIOS&&!standalone?'install':'unsupported';return}
+    if(Notification.permission==='denied'){P.st='denied';return}
+    try{const reg=await navigator.serviceWorker.getRegistration();const sub=reg&&await reg.pushManager.getSubscription();
+      if(sub&&Notification.permission==='granted'){P.ep=sub.endpoint;P.st='on'}else P.st='ready'}catch(e){P.st='ready'}};
+  const pushHtml=()=>{const nm=P.name,msg=P.msg?'<p class="'+(/^✅/.test(P.msg)?'muted':'ferr')+'" style="margin-top:8px">'+esc(P.msg)+'</p>':'';
+    if(P.st==='on')return '<div class="card pcard on"><b>🔔 Notifications on'+(nm?' for '+esc(nm):'')+'</b><span><button class="chip" data-a="ptest"'+(P.busy?' disabled':'')+'>Send me a test</button><button class="chip" data-a="poff">Turn off</button></span>'+msg+'</div>';
+    if(P.st==='ready')return '<div class="card pcard"><h3>🔔 Get a ping for every new expense</h3><p class="muted" style="margin-bottom:8px">Whose phone is this?</p>'+names.map(n=>'<button class="chip'+(n===nm?' on':'')+'" data-a="pn" data-v="'+esc(n)+'">'+esc(n)+'</button>').join('')+
+      '<div style="margin-top:10px"><button class="btn2" data-a="pon"'+(P.busy?' disabled':'')+'>'+(P.busy?'Turning on…':'🔔 Turn on notifications')+'</button></div>'+msg+'</div>';
+    if(P.st==='install')return '<div class="card pcard"><h3>🔔 Want a ping for every new expense?</h3><ol style="margin:6px 0 0 20px"><li>In Safari, tap the <b>Share</b> button (square with an arrow), then <b>Add to Home Screen</b>.</li><li>Open <b>Goa Trip</b> from your home screen.</li><li>Come back to The Damage and tap <b>Turn on notifications</b>.</li></ol><p class="muted" style="font-size:.8rem;margin-top:6px">iPhones only allow website notifications from the home-screen app (iOS 16.4 or newer).</p></div>';
+    if(P.st==='denied')return '<div class="card pcard"><h3>🔕 Notifications are blocked</h3><p class="muted">To allow them: iPhone <b>Settings → Notifications → Goa Trip → Allow Notifications</b>, then reopen the app.</p></div>';
+    if(P.st==='unsupported')return '<div class="card pcard"><p class="muted">🔕 This browser can\'t show notifications. On iPhone, add the site to your Home Screen and open it from there (iOS 16.4+).</p></div>';
+    return ''};
+  const pushOn=async()=>{
+    if(!P.name){P.msg='Pick your name first.';draw();return}
+    let perm;try{perm=await Notification.requestPermission()}catch(e){perm=Notification.permission}
+    if(perm!=='granted'){P.st=perm==='denied'?'denied':'ready';P.msg=perm==='denied'?'':'Notifications were not allowed. Tap the button again and choose Allow.';draw();return}
+    P.busy=true;P.msg='';draw();
+    try{const reg=await navigator.serviceWorker.register('sw.js');await navigator.serviceWorker.ready;
+      let sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(PK)});
+      const r=await api('/subscribe',{method:'POST',body:JSON.stringify({subscription:sub.toJSON(),name:P.name})});
+      if(!r.ok)throw new Error((await r.json().catch(()=>({}))).error||('server said '+r.status));
+      P.ep=sub.endpoint;P.st='on';ls('goa-push-name',P.name);P.msg='✅ Done! You\'ll get a ping when anyone else logs an expense.'}
+    catch(e){P.msg='Could not turn on notifications: '+(e&&e.message||e)}
+    P.busy=false;draw()};
+  const pushOff=async()=>{try{const reg=await navigator.serviceWorker.getRegistration(),sub=reg&&await reg.pushManager.getSubscription();
+      if(sub){await api('/unsubscribe',{method:'POST',body:JSON.stringify({endpoint:sub.endpoint})}).catch(()=>{});await sub.unsubscribe()}}catch(e){}
+    P.ep='';P.st='ready';P.msg='';draw()};
+  const pushTest=async()=>{P.busy=true;P.msg='';draw();
+    try{const r=await api('/test-push',{method:'POST',body:JSON.stringify({endpoint:P.ep})});const d=await r.json().catch(()=>({}));
+      if(r.status===404){P.st='ready';P.ep='';P.msg='This phone was not registered any more. Turn notifications on again.'}
+      else P.msg=r.ok?'✅ Test sent. It should pop up in a few seconds (lock the phone or switch apps to see it).':'The test did not go through (push service said '+(d.status||r.status)+').'}
+    catch(e){P.msg='Could not reach the server.'}
+    P.busy=false;draw()};
   const hdr={'Content-Type':'application/json'};
   const api=(path,opt={})=>fetch(API+path,{...opt,headers:{...hdr,'X-Trip-Code':code,...(opt.headers||{})},cache:'no-store'});
   const refresh=async()=>{if(!API||!code||busy)return;busy=true;
     try{
-      for(const q of queue.slice()){const r=await api('/expenses',{method:'POST',body:JSON.stringify(q)});if(r.ok||r.status===400){queue=queue.filter(x=>x.id!==q.id);saveQ()}else if(r.status===401)throw new Error('401')}
+      for(const q of queue.slice()){const r=await api('/expenses',{method:'POST',body:JSON.stringify(P.ep?{...q,skip:P.ep}:q)});if(r.ok||r.status===400){queue=queue.filter(x=>x.id!==q.id);saveQ()}else if(r.status===401)throw new Error('401')}
       const r=await api('/expenses');if(r.status===401){code='';ls('goa-code','');err='That trip code was not accepted. Ask Anunay for the right one.';busy=false;return draw()}
       if(!r.ok)throw new Error(r.status);const d=await r.json();entries=d.entries;ls('goa-entries',JSON.stringify(entries));lastOk=Date.now();err='';
     }catch(e){err=navigator.onLine===false||/Failed|fetch|Network/i.test(String(e))?'Offline or weak signal. Showing the last saved list; new entries will sync later.':'Could not reach the server, retrying.'}
@@ -111,7 +153,7 @@ budget(){
     const groups={};list.forEach(e=>{(groups[day(e.ts)]=groups[day(e.ts)]||[]).push(e)});
     const st=settle(net),sc=err?'⚠️ '+esc(err):'<span class="dot"></span> Live · updated '+(lastOk?tm(lastOk):'now');
     $('#app').innerHTML=head('The Damage 💸','Log every spend. Totals and balances update for everyone.')+'<section class="wrap">'+
-    '<div class="livebar">'+sc+'<button class="chip" data-a="refresh">↻ Refresh</button></div>'+
+    '<div class="livebar">'+sc+'<button class="chip" data-a="refresh">↻ Refresh</button></div>'+pushHtml()+
     '<div class="grid"><div class="card"><div class="muted">Spent on the trip</div><div class="big">'+money(total)+'</div><div class="muted" style="font-size:.85rem">'+list.length+' expense'+(list.length===1?'':'s')+' logged</div></div>'+
     '<div class="card"><div class="muted">Today</div><div class="big">'+money(todayTotal)+'</div><div class="muted" style="font-size:.85rem">'+esc(today)+'</div></div></div>'+
     '<div class="card" style="margin-top:16px"><h3>👥 Everyone\'s balance</h3><p class="muted" style="font-size:.82rem;margin-bottom:6px">Share = what each person owes of the logged spends. Net = paid minus share.</p>'+
@@ -152,12 +194,17 @@ budget(){
     else if(a==='del'){if(confirm('Delete this expense for everyone?')){entries=entries.filter(x=>x.id!==b.dataset.id);draw();try{await api('/expenses/'+encodeURIComponent(b.dataset.id),{method:'DELETE'})}catch(x){}refresh()}}
     else if(a==='code'){const v=document.getElementById('codein').value.trim();if(v){code=v;ls('goa-code',v);err='';draw();poll();refresh()}}
     else if(a==='invite')invite()
+    else if(a==='pn'){P.name=b.dataset.v;P.msg='';draw()}
+    else if(a==='pon'){if(!P.busy)pushOn()}
+    else if(a==='poff'){if(confirm('Turn off expense notifications on this phone?'))pushOff()}
+    else if(a==='ptest'){if(!P.busy&&P.ep)pushTest()}
     else if(a==='lock'){if(confirm('Forget the trip code on this phone?')){code='';ls('goa-code','');entries=[];ls('goa-entries','[]');draw()}}
     else if(a==='refresh')refresh();else if(a==='csv')csv()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal)close()});
   window.addEventListener('hashchange',()=>{const m=linkCode();if(m){code=m;ls('goa-code',code);err='';history.replaceState(null,'',location.pathname+location.search);draw();poll();refresh()}});
   draw();
   if(API&&code){poll();refresh()}
+  checkPush().then(()=>{if(!modal&&code)draw()});
 },
 outfits(){
   const O=TRIP.outfits,ph=id=>'https://images.pexels.com/photos/'+id+'/pexels-photo-'+id+'.jpeg?auto=compress&cs=tinysrgb&w=700';
@@ -417,3 +464,4 @@ gallery(){
   const lb=$('#lb');document.querySelectorAll('.pics figure').forEach(f=>f.onclick=()=>{lb.querySelector('img').src=f.dataset.s;lb.classList.add('on')});lb.onclick=()=>lb.classList.remove('on');
 }};
 R[page]();
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});

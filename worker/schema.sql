@@ -10,3 +10,12 @@ CREATE TABLE IF NOT EXISTS expenses (
   deleted   INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_expenses_ts ON expenses(ts);
+
+-- Phones that turned on notifications (Web Push subscriptions).
+CREATE TABLE IF NOT EXISTS subs (
+  endpoint  TEXT PRIMARY KEY,
+  p256dh    TEXT NOT NULL,
+  auth      TEXT NOT NULL,
+  name      TEXT NOT NULL DEFAULT '',
+  created   INTEGER NOT NULL
+);
