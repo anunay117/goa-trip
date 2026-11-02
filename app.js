@@ -4,13 +4,13 @@ const money=n=>TRIP.currency+Math.round(n).toLocaleString('en-IN');
 const parse=d=>new Date(d+'T00:00:00');
 const fmt=(d,o)=>d.toLocaleDateString('en-IN',o||{weekday:'short',day:'numeric',month:'short'});
 const ppl=TRIP.crew.filter(c=>!c.infant);
-const PAGES=[['index.html','Home','home'],['itinerary.html','The Plan','itinerary'],['crew.html','The Squad','crew'],['stay.html','The Crib','stay'],['ride.html','The Whip','ride'],['budget.html','The Damage','budget'],['outfits.html','Fit Check','outfits'],['playlists.html','Aux Cord','playlists'],['imposter.html','Imposter','imposter'],['gallery.html','Core Memories','gallery']];
-const page=document.body.dataset.page;
-document.title=(page==='home'?'':PAGES.find(p=>p[2]===page)[1]+' | ')+TRIP.name;
-document.body.insertAdjacentHTML('afterbegin','<nav><div class="wrap"><a class="logo" href="index.html">🌴 '+esc(TRIP.name)+'</a>'+PAGES.map(p=>'<a class="l'+(p[2]===page?' on':'')+'" href="'+p[0]+'">'+p[1]+'</a>').join('')+'<button class="mbtn" id="mbtn" aria-expanded="false" aria-controls="menu">☰ Menu</button></div></nav><div class="mq"><div>'+Array(8).join('<span>'+esc(TRIP.name)+' ✦ '+ppl.length+' BESTIES ✦ NO CAP ✦ OUT OF OFFICE ✦ </span>')+Array(8).join('<span>'+esc(TRIP.name)+' ✦ '+ppl.length+' BESTIES ✦ NO CAP ✦ OUT OF OFFICE ✦ </span>')+'</div></div>');
+const PAGES=[['index.html','Home','home'],['itinerary.html','The Plan','itinerary'],['crew.html','The Squad','crew'],['stay.html','The Crib','stay'],['ride.html','The Whip','ride'],['budget.html','The Damage','budget'],['outfits.html','Fit Check','outfits'],['playlists.html','Aux Cord','playlists'],['games.html','Games','games'],['gallery.html','Core Memories','gallery']];
+const page=document.body.dataset.page,nk=page==='imposter'?'games':page;
+document.title=(page==='home'?'':(page==='imposter'?'Imposter':PAGES.find(p=>p[2]===nk)[1])+' | ')+TRIP.name;
+document.body.insertAdjacentHTML('afterbegin','<nav><div class="wrap"><a class="logo" href="index.html">🌴 '+esc(TRIP.name)+'</a>'+PAGES.map(p=>'<a class="l'+(p[2]===nk?' on':'')+'" href="'+p[0]+'">'+p[1]+'</a>').join('')+'<button class="mbtn" id="mbtn" aria-expanded="false" aria-controls="menu">☰ Menu</button></div></nav><div class="mq"><div>'+Array(8).join('<span>'+esc(TRIP.name)+' ✦ '+ppl.length+' BESTIES ✦ NO CAP ✦ OUT OF OFFICE ✦ </span>')+Array(8).join('<span>'+esc(TRIP.name)+' ✦ '+ppl.length+' BESTIES ✦ NO CAP ✦ OUT OF OFFICE ✦ </span>')+'</div></div>');
 document.body.insertAdjacentHTML('beforeend','<footer>Made with ☀️ and zero sleep by the squad · '+esc(TRIP.name)+'</footer>');
-const MEM={outfits:'👗',playlists:'🎧',home:'🏠',itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',imposter:'🕵️',playlists:'🎧',gallery:'📸'};
-document.body.insertAdjacentHTML('beforeend','<div id="menu" class="menu" role="dialog" aria-label="Site menu"><div class="panel"><div class="mh"><b>Where to?</b><button id="mclose">✕ Close</button></div><div class="mg">'+PAGES.map(p=>'<a href="'+p[0]+'" class="'+(p[2]===page?'cur':'')+'"><span>'+(MEM[p[2]]||'•')+'</span>'+p[1]+(p[2]===page?'<small>you are here</small>':'')+'</a>').join('')+'</div></div></div>');
+const MEM={outfits:'👗',playlists:'🎧',home:'🏠',itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',imposter:'🕵️',games:'🎲',gallery:'📸'};
+document.body.insertAdjacentHTML('beforeend','<div id="menu" class="menu" role="dialog" aria-label="Site menu"><div class="panel"><div class="mh"><b>Where to?</b><button id="mclose">✕ Close</button></div><div class="mg">'+PAGES.map(p=>'<a href="'+p[0]+'" class="'+(p[2]===nk?'cur':'')+'"><span>'+(MEM[p[2]]||'•')+'</span>'+p[1]+(p[2]===nk?'<small>you are here</small>':'')+'</a>').join('')+'</div></div></div>');
 (function(){const m=document.getElementById('menu'),b=document.getElementById('mbtn');
   const set=o=>{m.classList.toggle('on',o);b.setAttribute('aria-expanded',o);document.body.style.overflow=o?'hidden':''};
   b.onclick=()=>set(!m.classList.contains('on'));document.getElementById('mclose').onclick=()=>set(false);
@@ -25,7 +25,7 @@ const plCard=p=>'<div class="card pl"><div class="ple">'+p.emoji+'</div><h3>'+es
 const R={
 home(){
   const s=parse(TRIP.start),e=parse(TRIP.end),w=TRIP.weather;
-  const em={itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',outfits:'👗',playlists:'🎧',imposter:'🕵️',gallery:'📸'};
+  const em={itinerary:'🗓️',crew:'👯',stay:'🏡',ride:'🚙',budget:'💸',outfits:'👗',playlists:'🎧',imposter:'🕵️',games:'🎲',gallery:'📸'};
   const tiles=PAGES.slice(1).map(p=>'<a class="card tile" href="'+p[0]+'"><div class="e">'+(em[p[2]]||'•')+'</div><h3>'+p[1]+'</h3></a>').join('');
   let pk=[];try{pk=JSON.parse(localStorage.getItem('goa-pack2')||'[]')}catch(x){}
   const groups=TRIP.packing.map(g=>'<div class="card check"><h3>'+g.emoji+' '+esc(g.group)+'</h3>'+g.items.map(x=>'<label><input type="checkbox" data-n="'+esc(x)+'" '+(pk.includes(x)?'checked':'')+'> '+esc(x)+'</label>').join('')+'</div>').join('');
@@ -225,7 +225,7 @@ imposter(){
       '<p class="muted" style="font-size:.8rem;margin-top:8px">Innocents who catch the imposter get 1 point each. An imposter who wins gets 2. Scores are saved on this device.</p>'+
       (S.hist.length?'<h3 style="margin-top:14px;font-size:1.1rem">Round history</h3>'+S.hist.slice().reverse().slice(0,12).map(h=>'<div style="padding:4px 0">Round '+h.n+': <b>'+esc(h.imp)+'</b> was the imposter ('+esc(h.word)+') &rarr; <b>'+(h.win==='imp'?'Imposter won':'Innocents won')+'</b></div>').join(''):'')+
       '<button class="btn2 alt" data-act="resetscores" style="margin-top:12px">Reset scores</button></div>';
-    $('#app').innerHTML=head('Imposter 🕵️','Same word for everyone. Except one.')+'<section class="wrap">'+top+board+'</section>';
+    $('#app').innerHTML=head('Imposter 🕵️','Same word for everyone. Except one.')+'<section class="wrap"><div class="ftabs"><a href="games.html" class="chip">← Game Night</a></div>'+top+board+'</section>';
   };
   $('#app').addEventListener('click',e=>{
     const b=e.target.closest('[data-act]');if(!b||b.type==='checkbox')return;const a=b.dataset.act;
@@ -244,6 +244,141 @@ imposter(){
     draw();
   });
   $('#app').addEventListener('change',e=>{if(e.target.dataset.act==='clue'){cfg.clue=e.target.checked;draw()}});
+  draw();
+},
+
+games(){
+  const names=ppl.map(p=>p.name);
+  const rnd=n=>crypto.getRandomValues(new Uint32Array(1))[0]%n;
+  const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+  const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+  const keep=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+  const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+  const mm=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  const back='<div class="ftabs"><a href="#" class="chip">← Game Night</a></div>';
+  const GAMES=[
+    {href:'imposter.html',emoji:'🕵️',title:'Imposter',bg:'var(--pink)',text:'Everyone gets the same secret word, except one person. Talk it out and catch the imposter.'},
+    {href:'#charades',emoji:'🎬',title:'Dumb Charades',bg:'var(--yellow)',text:'Act out Bollywood movies, songs and shows without saying a word. Two teams, a timer and a scoreboard.'},
+    {href:'#spin',emoji:'🎡',title:'Spin the Wheel',bg:'var(--cyan)',text:'Let the wheel decide: who pays for chai, who picks the next song, who does the dare.'}];
+  const hub=()=>'<div class="card" style="background:var(--lime);color:#111"><h3>🌙 Villa nights sorted</h3><p>Pass-the-phone party games for the squad. No internet, no sign-ups, just one phone and a lot of shouting.</p></div>'+
+    '<div class="fchome">'+GAMES.map(g=>'<a class="card tile gtile" href="'+g.href+'" style="background:'+g.bg+';color:#111"><div class="e">'+g.emoji+'</div><h3>'+esc(g.title)+'</h3><p>'+esc(g.text)+'</p><span class="pbtn" style="background:#111;color:#fff;margin-top:12px;display:inline-block">Play →</span></a>').join('')+'</div>';
+
+  /* ---------- Dumb Charades ---------- */
+  const LIST=typeof CHARADES!=='undefined'?CHARADES:[],CATS=[...new Set(LIST.map(x=>x.c))];
+  let C=load('goa-charades',null);
+  if(!C||!Array.isArray(C.teams)||C.teams.length!==2)C={teams:[{name:'Team Chai',m:[],pts:0},{name:'Team Feni',m:[],pts:0}],turn:0,ai:[0,0],secs:90,cats:CATS.slice(),hist:[]};
+  C.teams.forEach(t=>t.m=t.m.filter(n=>names.includes(n)));
+  names.filter(n=>!C.teams.some(t=>t.m.includes(n))).forEach(n=>{(C.teams[0].m.length<=C.teams[1].m.length?C.teams[0]:C.teams[1]).m.push(n)});
+  C.cats=(C.cats||[]).filter(c=>CATS.includes(c));if(!C.cats.length)C.cats=CATS.slice();
+  const saveC=()=>keep('goa-charades',{teams:C.teams,turn:C.turn,ai:C.ai,secs:C.secs,cats:C.cats,hist:C.hist.slice(-30)});
+  let T=null,deck=[],tid=null;
+  const pick=()=>{const ok=x=>C.cats.includes(x.c);deck=deck.filter(ok);if(!deck.length)deck=shuffle(LIST.filter(ok));return deck.pop()};
+  const stop=()=>{clearInterval(tid);tid=null};
+  const newTurn=()=>{stop();const ti=C.turn,tm=C.teams[ti],actor=tm.m[C.ai[ti]%tm.m.length];T={ti,actor,item:pick(),phase:'pass',skips:1,left:C.secs,peek:false}};
+  const endTurn=res=>{stop();T.phase='done';T.res=res;if(res==='got')C.teams[T.ti].pts++;
+    C.hist.push({team:C.teams[T.ti].name,actor:T.actor,t:T.item.t,got:res==='got'});C.ai[T.ti]++;C.turn=1-T.ti;saveC();buzz(res==='got'?[80,60,80]:[300])};
+  const words=t=>t.trim().split(/\s+/).length;
+  const charades=()=>{
+    if(!LIST.length)return back+'<div class="card"><p>The title list did not load. Refresh the page.</p></div>';
+    const ok=C.teams.every(t=>t.m.length>0);
+    const board='<div class="card" style="margin-top:18px"><h3>🏆 Scoreboard</h3><div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">'+C.teams.map((t,i)=>'<div style="border:3px solid var(--bd);border-radius:12px;padding:8px;text-align:center;background:'+(i?'var(--cyan)':'var(--yellow)')+';color:#111"><div class="big">'+t.pts+'</div>'+esc(t.name)+'</div>').join('')+'</div>'+
+      (C.hist.length?'<h3 style="margin-top:14px;font-size:1.1rem">Last turns</h3>'+C.hist.slice().reverse().slice(0,8).map(h=>'<div style="padding:4px 0">'+(h.got?'✅':'❌')+' <b>'+esc(h.actor)+'</b> ('+esc(h.team)+') acted <i>'+esc(h.t)+'</i></div>').join(''):'')+
+      '<button class="btn2 alt" data-g="c-reset" style="margin-top:12px">Reset scores</button></div>';
+    let top;
+    if(!T){
+      const nt=C.teams[C.turn],na=nt.m.length?nt.m[C.ai[C.turn]%nt.m.length]:'';
+      top='<div class="card"><h3>⚙️ Teams</h3><p class="muted" style="margin-bottom:10px">Tap a name to move them to the other team.</p><div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">'+
+        C.teams.map((t,i)=>'<div style="border:3px solid var(--bd);border-radius:14px;padding:10px;background:'+(i?'var(--cyan)':'var(--yellow)')+';color:#111"><b style="font-family:Bricolage Grotesque;font-size:1.15rem">'+esc(t.name)+'</b><div style="margin-top:8px">'+(t.m.map(n=>'<button class="chip" data-g="c-move" data-n="'+esc(n)+'">'+esc(n)+'</button>').join('')||'<span>Nobody yet</span>')+'</div></div>').join('')+'</div>'+
+        '<button class="btn2 alt" data-g="c-shuffle" style="margin-top:12px">🔀 Shuffle teams</button>'+
+        '<p class="muted" style="margin:14px 0 6px">What to act</p>'+CATS.map(c=>'<button class="chip'+(C.cats.includes(c)?' on':'')+'" data-g="c-cat" data-c="'+esc(c)+'">'+esc(c)+'</button>').join('')+
+        '<p class="muted" style="margin:12px 0 6px">Time per turn</p>'+[60,90,120].map(s=>'<button class="chip'+(C.secs===s?' on':'')+'" data-g="c-secs" data-s="'+s+'">'+s+' sec</button>').join('')+
+        '<div style="margin-top:14px"><button class="btn2" data-g="c-start"'+(ok&&C.cats.length?'':' disabled')+'>🎬 Start: '+esc(nt.name)+(na?', '+esc(na)+' acts':'')+'</button>'+(ok?'':'<span class="muted"> Both teams need at least one player.</span>')+'</div></div>'+
+        '<div class="card" style="margin-top:18px"><h3>📜 How to play</h3><ul style="margin-left:18px"><li>The actor secretly sees a title, then acts it out for their own team. <b>No talking, no mouthing words, no pointing at things that spell it.</b></li><li>Show the category first: crank an old film camera for a <b>movie</b>, pretend to sing into a mic for a <b>song</b>, draw a TV box in the air for a <b>show</b>.</li><li>Hold up fingers for the number of words, then fingers again to say which word you are acting. Tap your forearm with fingers for syllables.</li><li>Guess it before the timer runs out to win 1 point. Teams take turns, and everyone gets a go at acting.</li></ul></div>';
+    }else if(T.phase==='pass'){
+      top='<div class="card"><h3>🎬 '+esc(C.teams[T.ti].name)+'</h3><p style="font-size:1.25rem">Pass the phone to <b>'+esc(T.actor)+'</b></p><p class="muted" style="margin:6px 0 12px">Only the actor looks. Everyone else, eyes off the screen!</p><button class="btn2" data-g="c-show">👀 I am '+esc(T.actor)+', show me</button> <button class="btn2 alt" data-g="c-cancel">Cancel</button></div>';
+    }else if(T.phase==='show'){
+      top='<div class="card"><div class="rolecard"><p>'+esc(T.item.c)+' · '+words(T.item.t)+' word'+(words(T.item.t)>1?'s':'')+'</p><h3 style="font-size:2.3rem;margin-top:8px;text-transform:none">'+esc(T.item.t)+'</h3><p style="margin-top:10px;color:var(--lime)">Memorise it. No talking from now on!</p></div>'+
+        '<div style="margin-top:12px"><button class="btn2" data-g="c-go">▶️ Hide it and start the timer</button> '+(T.skips?'<button class="btn2 alt" data-g="c-skip">🔁 Too hard? Skip ('+T.skips+' left)</button>':'')+'</div></div>';
+    }else if(T.phase==='act'){
+      top='<div class="card" style="text-align:center"><h3>'+esc(T.actor)+' is acting for '+esc(C.teams[T.ti].name)+'</h3><div class="big ctimer'+(T.left<=10?' low':'')+'" id="ctm">'+mm(Math.max(T.left,0))+'</div>'+
+        '<p class="muted" style="margin-bottom:10px">'+esc(T.item.c)+' · '+words(T.item.t)+' word'+(words(T.item.t)>1?'s':'')+(T.peek?' · <b style="color:var(--ink)">'+esc(T.item.t)+'</b>':'')+'</p>'+
+        '<button class="btn2" data-g="c-got" style="font-size:1.25rem">✅ They guessed it!</button> <button class="btn2 alt" data-g="c-giveup">❌ Give up</button><div><button class="chip" data-g="c-peek" style="margin-top:10px">'+(T.peek?'🙈 Hide title':'👀 Actor peek')+'</button></div></div>';
+    }else{
+      const nt=C.teams[C.turn];
+      top='<div class="card"><h3>'+(T.res==='got'?'🎉 Got it! +1 for '+esc(C.teams[T.ti].name):T.res==='time'?'⏰ Time is up!':'😅 No points this time')+'</h3><p>The title was <b>'+esc(T.item.t)+'</b> <span class="muted">('+esc(T.item.c)+')</span>.</p><div style="margin-top:12px"><button class="btn2" data-g="c-start">▶️ Next: '+esc(nt.name)+'</button> <button class="btn2 alt" data-g="c-cancel">Change teams / settings</button></div></div>';
+    }
+    return back+top+board;
+  };
+  const tick=()=>{T.left--;const el=document.getElementById('ctm');if(el){el.textContent=mm(Math.max(T.left,0));el.classList.toggle('low',T.left<=10)}
+    if(T.left===10)buzz(120);if(T.left<=0){endTurn('time');draw()}};
+
+  /* ---------- Spin the Wheel ---------- */
+  const QS=['Who pays for the next round of chai? ☕','Who picks the next song? 🎧','Who gets the front seat? 🚙','Who does the next dare? 😈','Who orders for the whole table? 🍤','Who wakes everyone up tomorrow? ⏰','Who takes the group photo? 📸','Who hits the dance floor first? 💃','Who carries the beach bag today? 🎒'];
+  let W=load('goa-spin',null);
+  if(!W||!Array.isArray(W.off))W={mode:'crew',q:0,custom:'Beach shack\nCafe\nSeafood place\nOrder in at the villa',off:[],elim:false,hist:[]};
+  const saveW=()=>keep('goa-spin',{mode:W.mode,q:W.q,custom:W.custom,off:W.off,elim:W.elim,hist:W.hist.slice(-12)});
+  let rot=0,spinning=false,result=null;
+  const opts=()=>W.mode==='crew'?names.filter(n=>!W.off.includes(n)):W.custom.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,16);
+  const COLS=['#ffe14d','#38e1ff','#c6ff3d','#8f5cff','#ff7a3d','#4a63ff','#ff5fa2','#2fbf71'];
+  const wheelSvg=o=>{const n=o.length,R=150,c=160,seg=360/n,pt=a=>[c+R*Math.sin(a*Math.PI/180),c-R*Math.cos(a*Math.PI/180)];
+    if(!n)return '<p class="muted" style="text-align:center;padding:60px 0">Add at least 2 options to spin.</p>';
+    const fs=n<=6?17:n<=10?14:11,lbl=s=>s.length>16?s.slice(0,15)+'…':s;
+    return '<svg viewBox="0 0 320 320" class="wheel" id="wheel" style="transform:rotate('+rot+'deg)" role="img" aria-label="Wheel with '+n+' options">'+
+      o.map((s,i)=>{const a0=i*seg,a1=(i+1)*seg,[x0,y0]=pt(a0),[x1,y1]=pt(a1),col=COLS[i%COLS.length],dark=['#8f5cff','#4a63ff','#2fbf71'].includes(col);
+        const path=n===1?'<circle cx="'+c+'" cy="'+c+'" r="'+R+'" fill="'+col+'" stroke="#111" stroke-width="3"/>':'<path d="M'+c+' '+c+' L'+x0.toFixed(2)+' '+y0.toFixed(2)+' A'+R+' '+R+' 0 '+(seg>180?1:0)+' 1 '+x1.toFixed(2)+' '+y1.toFixed(2)+' Z" fill="'+col+'" stroke="#111" stroke-width="3"/>';
+        return path+'<text transform="rotate('+((a0+a1)/2-90).toFixed(2)+' '+c+' '+c+')" x="'+(c+R*0.58)+'" y="'+c+'" dy=".35em" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="'+fs+'" fill="'+(dark?'#fff':'#111')+'">'+esc(lbl(s))+'</text>'}).join('')+
+      '<circle cx="'+c+'" cy="'+c+'" r="22" fill="#111" stroke="#fff" stroke-width="3"/></svg>'};
+  const spin=()=>{
+    const o=opts();if(o.length<2||spinning)return;spinning=true;result=null;
+    const n=o.length,seg=360/n,i=rnd(n),pos=(i+0.15+0.7*(rnd(1000)/1000))*seg;
+    rot=rot+360*6+((360-pos-(rot%360))%360+360)%360;
+    const w=document.getElementById('wheel'),res=document.getElementById('wres'),b=document.getElementById('wbtn');
+    if(res)res.innerHTML='<p class="muted">Spinning…</p>';if(b)b.disabled=true;
+    w.style.transition='transform 4.2s cubic-bezier(.12,.68,.1,1)';requestAnimationFrame(()=>{w.style.transform='rotate('+rot+'deg)'});
+    setTimeout(()=>{spinning=false;result={who:o[i],q:W.mode==='crew'?QS[W.q]:'The wheel says'};
+      W.hist.push({who:o[i],q:result.q});if(W.elim&&W.mode==='crew'&&o.length>2)W.off.push(o[i]);saveW();buzz([60,40,60]);draw()},4300)};
+  const spinView=()=>{const o=opts();
+    return back+'<div class="card"><div class="ftabs" style="margin:0 0 12px">'+[['crew','👯 Squad'],['custom','✏️ Custom options']].map(m=>'<button class="chip'+(W.mode===m[0]?' on':'')+'" data-g="w-mode" data-m="'+m[0]+'">'+m[1]+'</button>').join('')+'</div>'+
+      (W.mode==='crew'?'<p class="muted" style="margin-bottom:6px">The question</p><select id="wq" class="wsel">'+QS.map((q,i)=>'<option value="'+i+'"'+(i===W.q?' selected':'')+'>'+esc(q)+'</option>').join('')+'</select>'+
+        '<p class="muted" style="margin:12px 0 6px">Who is on the wheel? (tap to remove or add)</p>'+names.map(n=>'<button class="chip'+(W.off.includes(n)?'':' on')+'" data-g="w-who" data-n="'+esc(n)+'">'+esc(n)+'</button>').join('')+
+        '<label class="chk" style="margin-top:8px"><input type="checkbox" id="welim" '+(W.elim?'checked':'')+'> Take the winner off the wheel after each spin (fair turns)</label>'
+       :'<p class="muted" style="margin-bottom:6px">One option per line (up to 16). Great for "where do we eat?"</p><textarea id="wcustom" class="wsel" rows="5">'+esc(W.custom)+'</textarea>')+
+      '</div><div class="card wcard" style="margin-top:18px;text-align:center"><h3>'+esc(W.mode==='crew'?QS[W.q]:'Spin to decide')+'</h3><div class="wwrap"><div class="wptr" aria-hidden="true"></div>'+wheelSvg(o)+'</div>'+
+      '<button class="btn2" id="wbtn" data-g="w-spin" style="font-size:1.3rem;padding:12px 34px"'+(o.length<2?' disabled':'')+'>🎡 SPIN</button>'+
+      '<div id="wres" style="margin-top:12px">'+(result?'<div class="rolecard"><p>'+esc(result.q)+'</p><h3 style="font-size:2.4rem;margin-top:6px;text-transform:none">'+esc(result.who)+'</h3></div>':'')+'</div></div>'+
+      (W.hist.length?'<div class="card" style="margin-top:18px"><h3>📜 Recent spins</h3>'+W.hist.slice().reverse().slice(0,8).map(h=>'<div style="padding:4px 0"><b>'+esc(h.who)+'</b> <span class="muted">· '+esc(h.q)+'</span></div>').join('')+'<button class="btn2 alt" data-g="w-clear" style="margin-top:10px">Clear history</button></div>':'');
+  };
+
+  /* ---------- router + events ---------- */
+  const view=()=>{const h=location.hash.slice(1);return h==='charades'||h==='spin'?h:'hub'};
+  const SUB={hub:'Pass the phone. Let the chaos begin.',charades:'Dumb Charades 🎬 · act it, don\'t say it.',spin:'Spin the Wheel 🎡 · the wheel has spoken.'};
+  const draw=()=>{const v=view();
+    $('#app').innerHTML=head('Game Night 🎲',esc(SUB[v]))+'<section class="wrap">'+(v==='charades'?charades():v==='spin'?spinView():hub())+'</section>'};
+  $('#app').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b||b.disabled)return;const a=b.dataset.g;
+    if(a==='c-move'){const n=b.dataset.n,i=C.teams[0].m.includes(n)?0:1;C.teams[i].m=C.teams[i].m.filter(x=>x!==n);C.teams[1-i].m.push(n);saveC()}
+    else if(a==='c-shuffle'){const s=shuffle(names),h=Math.ceil(s.length/2);C.teams[0].m=s.slice(0,h);C.teams[1].m=s.slice(h);C.ai=[0,0];saveC()}
+    else if(a==='c-cat'){const c=b.dataset.c;C.cats=C.cats.includes(c)?C.cats.filter(x=>x!==c):C.cats.concat(c);saveC()}
+    else if(a==='c-secs'){C.secs=+b.dataset.s;saveC()}
+    else if(a==='c-start'){newTurn()}
+    else if(a==='c-cancel'){stop();T=null}
+    else if(a==='c-show'){T.phase='show'}
+    else if(a==='c-skip'){T.skips--;T.item=pick()}
+    else if(a==='c-go'){T.phase='act';T.left=C.secs;stop();tid=setInterval(tick,1000)}
+    else if(a==='c-peek'){T.peek=!T.peek}
+    else if(a==='c-got'){endTurn('got')}
+    else if(a==='c-giveup'){endTurn('gave')}
+    else if(a==='c-reset'){if(!confirm('Reset charades scores?'))return;C.teams.forEach(t=>t.pts=0);C.hist=[];C.ai=[0,0];C.turn=0;saveC()}
+    else if(a==='w-mode'){W.mode=b.dataset.m;result=null;saveW()}
+    else if(a==='w-who'){const n=b.dataset.n;W.off=W.off.includes(n)?W.off.filter(x=>x!==n):W.off.concat(n);result=null;saveW()}
+    else if(a==='w-spin'){spin();return}
+    else if(a==='w-clear'){W.hist=[];saveW()}
+    else return;
+    draw()});
+  $('#app').addEventListener('change',e=>{const t=e.target;
+    if(t.id==='wq'){W.q=+t.value;result=null;saveW();draw()}
+    else if(t.id==='welim'){W.elim=t.checked;saveW()}
+    else if(t.id==='wcustom'){W.custom=t.value.slice(0,600);result=null;saveW();draw()}});
+  window.addEventListener('hashchange',()=>{if(view()!=='charades'){stop();if(T&&T.phase!=='done')T=null}draw();window.scrollTo(0,0)});
   draw();
 },
 
