@@ -79,7 +79,7 @@ const TRIP = {
   // Pre-trip costs already paid (real), all paid by Anunay. settled = everyone has paid Anunay back their share.
   // Daily spends are logged live on The Damage page, not here.
   budget: [
-    { cat: "Stay",   label: "Homero Villa: booking amount (half of ₹28,000)", amount: 14000, paidBy: "Anunay", settled: true },
+    { cat: "Stay",   label: "Homero Villa: booking amount (half of ₹28,000)", amount: 14000, paidBy: "Anunay", settled: true, owing: ["Deepak"] },   // Deepak's ₹2,333 share is logged in the tracker (id pre-villa-deepak)
     { cat: "Travel", label: "Flights (IndiGo, Delhi-Goa-Delhi)", amount: 123135, exclude: ["Deepak"], paidBy: "Anunay", settled: true },   // Deepak has a separate ticket
     { cat: "Travel", label: "Arsi's flight (infant fare + tax)", amount: 4000, only: ["Anunay"], short: "Arsi", paidBy: "Anunay" }   // charged to Anunay only
   ],
