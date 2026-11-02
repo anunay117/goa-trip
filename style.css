@@ -134,3 +134,8 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
 .sheet .mh button{font:800 1rem sans-serif;border:3px solid var(--bd);background:var(--yellow);color:#111;border-radius:10px;padding:2px 10px;cursor:pointer}
 .sheet .lab{font-weight:800;margin:10px 0 6px}.sheet input[type=text],.sheet input[type=number],#codein{width:100%;font:600 1.1rem "Space Grotesk";padding:10px 12px;border:3px solid var(--bd);border-radius:12px;background:var(--card);color:var(--ink)}
 #codein{margin:6px 0 10px}.sheet .chip{margin-bottom:6px}.ferr{color:#d12b2b;font-weight:700;margin:8px 0}
+.ftabs{display:flex;gap:8px;margin:4px 0 20px}.ftabs .chip{text-decoration:none;font-size:1rem;padding:8px 20px;box-shadow:3px 3px 0 var(--bd)}
+.pbtn.pin{background:#e60023;color:#fff}.pbtn.igb{background:linear-gradient(45deg,#f9a03f,#e1306c,#833ab4);color:#fff}
+.toes{display:flex;flex-wrap:wrap;gap:12px}.toes span{display:flex;align-items:center;gap:8px;font-weight:700;border:2px solid var(--bd);border-radius:999px;padding:4px 14px 4px 6px}.toes i{width:22px;height:22px;border-radius:50%;border:2px solid #111;display:inline-block}
+.toecard{display:grid;grid-template-columns:200px 1fr;gap:18px;align-items:center}.toecard img{width:100%;aspect-ratio:1;object-fit:cover;border:3px solid var(--bd);border-radius:14px;display:block}
+@media(max-width:560px){.toecard{grid-template-columns:1fr}}

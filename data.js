@@ -214,6 +214,78 @@ const TRIP = {
     boys: "Boys are too smart, they don't need suggestions. 😎"
   },
 
+  // Fit Check > Nails tab. photo = free Pexels stock photo id (checked by eye to match the design); pin / ig = Pinterest search and Instagram hashtag for more references.
+  nails: {
+    intro: "Salt water, sand, sunscreen and pool chlorine are hard on nails. Gel or BIAB on short-to-medium nails lasts the whole trip; regular polish usually chips by day 2.",
+    ideas: [
+      { title: "Ocean teal", emoji: "🌊", when: "All-trip beach set", photo: 10420563,
+        why: "Glossy sea-blue teal that matches the Arabian Sea in every photo. Looks amazing with silver rings.",
+        tips: "Almond shape looks elegant, but go a bit shorter than the photo so it survives the beach and the luggage.",
+        pin: "ocean teal nails summer", ig: "oceannails" },
+      { title: "Coral beach brights", emoji: "🧡", when: "Beach days and pool time", photo: 11393877,
+        why: "Bright coral-orange is the classic beach colour. Pops on a tan and against blue water.",
+        tips: "Ask for a neon coral gel. Short, rounded nails are the most practical for sand and swimming.",
+        pin: "coral summer nails", ig: "coralnails" },
+      { title: "Blue French tips", emoji: "💙", when: "Airport fit to last day", photo: 12653044,
+        why: "Classic French, but with a navy or cobalt tip. Clean enough for the flight and the churches, fun enough for the beach.",
+        tips: "Swap navy for turquoise or coral tips if you want it more beachy. Micro French grows out neatly.",
+        pin: "blue french tip nails", ig: "frenchtipnails" },
+      { title: "Tropical leaf accent", emoji: "🌿", when: "Day trips and cafe hopping", photo: 704815,
+        why: "Deep green with one hand-painted leaf nail. Very 'palm trees and coconut shacks' without being loud.",
+        tips: "Keep the leaf art to one accent nail per hand. Ask for a palm-frond design instead of a fern for extra Goa energy.",
+        pin: "tropical leaf nail art", ig: "tropicalnails" },
+      { title: "Skittles polka dots", emoji: "🍭", when: "Pool day and scooter rides", photo: 7066258,
+        why: "A different bright colour on each nail with white polka dots. Playful and great in group hand photos.",
+        tips: "Neons go see-through on their own, so ask for a white base underneath.",
+        pin: "skittle polka dot nails", ig: "skittlenails" },
+      { title: "Sand nude + gold leaf", emoji: "✨", when: "Party night and photos", photo: 36207029,
+        why: "Warm sandy nude with flakes of gold. Looks rich, hides chips and matches gold jewellery.",
+        tips: "A matte top coat on the nude and glossy on the gold looks super editorial.",
+        pin: "nude gold leaf nails", ig: "goldfoilnails" },
+      { title: "Glazed nude + sparkle", emoji: "🐚", when: "Dinner and jumpsuit nights", photo: 17280274,
+        why: "Milky nude with one glitter accent nail. Subtle, classy and goes with every outfit in your bag.",
+        tips: "For the seashell look, ask for pearl chrome powder over milky white instead of glitter.",
+        pin: "pearl chrome glazed nails", ig: "chromenails" },
+      { title: "Pastel speckle", emoji: "🎨", when: "Brunch and market walks", photo: 13277178,
+        why: "Soft pastel shades with tiny speckles, like painted pebbles. Cute, artsy and different from everyone else's.",
+        tips: "Mix two or three pastels across the nails. Speckles hide small chips really well.",
+        pin: "pastel speckle nail art", ig: "nailart" },
+      { title: "Pink florals", emoji: "🌸", when: "Beach club and night out", photo: 35031996,
+        why: "Soft pink with delicate flower art. Girly and pretty, and looks gorgeous with a party maxi.",
+        tips: "Hibiscus or frangipani flowers on one or two nails gives it a proper tropical twist.",
+        pin: "pink floral nails summer", ig: "floralnails" },
+      { title: "Neon glow party nails", emoji: "🪩", when: "Night out / beach club", photo: 5871831,
+        why: "Neon art that glows under the club's UV lights. Made for the big night in Goa.",
+        tips: "Ask the salon for UV-reactive or neon gel, and do a neon line design on a few nails.",
+        pin: "neon nail art", ig: "neonnails" },
+      { title: "Soft pink shimmer", emoji: "💗", when: "Low effort / no-salon backup", photo: 939836,
+        why: "Sheer pink with a little shimmer. Goes with everything and chips don't show, so it is perfect if there is no time for a salon.",
+        tips: "Pair it with a bright pedicure (coral or turquoise toes) so it still feels like a beach look.",
+        pin: "pink shimmer nails", ig: "pinknails" }
+    ],
+    toesPhoto: 8981504,
+    toes: [
+      { name: "Coral", c: "#ff6f61" }, { name: "Turquoise", c: "#2bc4c4" }, { name: "Hot pink", c: "#ff3d8b" },
+      { name: "Sunny yellow", c: "#ffd23f" }, { name: "Classic red", c: "#c8102e" }, { name: "White", c: "#ffffff" }
+    ],
+    tips: [
+      "Book the salon for Mon 30 Nov or Tue 1 Dec, so the nails are fresh but have set before the 3 Dec flight.",
+      "Gel or BIAB survives salt water and sand much better than regular polish.",
+      "Keep length short to medium. Long acrylics and sea, sand, and suitcases don't mix.",
+      "Pack a mini nail file, cuticle oil and a clear top coat for quick fixes.",
+      "Sunscreen and chlorine can yellow pale shades. A UV-protective top coat helps.",
+      "Do a matching pedicure. Toes are in every beach photo too."
+    ],
+    inspo: [
+      { label: "Pinterest: beach nails", url: "https://in.pinterest.com/search/pins/?q=beach%20nails" },
+      { label: "Pinterest: Goa vacation nails", url: "https://in.pinterest.com/search/pins/?q=goa%20vacation%20nails" },
+      { label: "Pinterest: summer vacation nail art", url: "https://in.pinterest.com/search/pins/?q=summer%20vacation%20nail%20art" },
+      { label: "Instagram: #beachnails", url: "https://www.instagram.com/explore/tags/beachnails/" },
+      { label: "Instagram: #vacationnails", url: "https://www.instagram.com/explore/tags/vacationnails/" },
+      { label: "Instagram: #summernails", url: "https://www.instagram.com/explore/tags/summernails/" }
+    ]
+  },
+
   photos: [                       // drop images in the photos/ folder, then list them here
     // { src: "photos/beach.jpg", caption: "Sunset at Vagator" },
   ]
