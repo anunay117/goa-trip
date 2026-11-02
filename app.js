@@ -63,7 +63,8 @@ budget(){
   const lg=k=>{try{return localStorage.getItem(k)}catch(e){return null}},ls=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
   const local=location.protocol==='file:'||['localhost','127.0.0.1'].includes(location.hostname);
   const API=((local&&new URLSearchParams(location.search).get('api'))||(TRIP.expenseApi||'')).replace(/\/$/,'');
-  const hm=location.hash.match(/k=([\w-]{6,64})/);if(hm){ls('goa-code',hm[1]);history.replaceState(null,'',location.pathname+location.search)}
+  const linkCode=()=>{const m=location.hash.match(/k=([^&]{1,200})/);if(!m)return '';try{return decodeURIComponent(m[1]).trim()}catch(e){return ''}};
+  const hm=linkCode();if(hm){ls('goa-code',hm);history.replaceState(null,'',location.pathname+location.search)}
   let code=lg('goa-code')||'',entries=[],queue=[],err='',lastOk=0,me=lg('goa-me')||'',busy=false,modal=false;
   try{entries=JSON.parse(lg('goa-entries')||'[]')}catch(e){}
   try{queue=JSON.parse(lg('goa-queue')||'[]')}catch(e){}
@@ -85,6 +86,11 @@ budget(){
       if(!r.ok)throw new Error(r.status);const d=await r.json();entries=d.entries;ls('goa-entries',JSON.stringify(entries));lastOk=Date.now();err='';
     }catch(e){err=navigator.onLine===false||/Failed|fetch|Network/i.test(String(e))?'Offline or weak signal. Showing the last saved list; new entries will sync later.':'Could not reach the server, retrying.'}
     busy=false;if(!modal)draw()};
+  let polling=false;
+  const poll=()=>{if(polling||!API)return;polling=true;setInterval(()=>{if(code&&!document.hidden&&!modal)refresh()},8000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});window.addEventListener('online',refresh)};
+  const invite=async()=>{const u=location.origin+location.pathname+'#k='+encodeURIComponent(code);
+    try{if(navigator.share){await navigator.share({title:TRIP.name+' expenses',text:'Log Goa trip spends here:',url:u});return}}catch(e){if(e&&e.name==='AbortError')return}
+    try{await navigator.clipboard.writeText(u);alert('Invite link copied. Send it to the group.\n\nAnyone with this link can see and add expenses.')}catch(e){prompt('Copy this invite link:',u)}};
   const csv=()=>{const rows=[['Date','Time','Paid by','Amount','Category','What for','Split between']].concat(all().map(e=>[day(e.ts),tm(e.ts),e.paid_by,e.amount,e.category,e.note,(e.split||[]).join(' + ')]));
     const t=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(t);a.download='goa-trip-expenses.csv';a.click()};
   const sheet=()=>{const sel=new Set(names);let cat='Food',who=names.includes(me)?me:'';
@@ -114,7 +120,7 @@ budget(){
     (Object.keys(cats).length?'<div class="card" style="margin-top:16px"><h3>By category</h3>'+Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<div style="margin:10px 0"><div style="display:flex;justify-content:space-between"><span>'+(catEmoji[k]||'')+' '+esc(k)+'</span><b>'+money(v)+'</b></div><div class="bar"><i style="width:'+v/mx*100+'%"></i></div></div>').join('')+'</div>':'')+
     '<div class="card" style="margin-top:16px"><h3>🧾 Expenses</h3>'+(list.length?Object.entries(groups).map(([d,es])=>'<div class="dayh">'+esc(d)+' · '+money(es.reduce((a,e)=>a+e.amount,0))+'</div>'+es.map(e=>'<div class="exp"><div class="ex1"><b>'+(catEmoji[e.category]||'✨')+' '+esc(e.note||e.category)+'</b>'+(e.pending?' <span class="tag">⏳ syncing</span>':'')+'<div class="muted" style="font-size:.8rem">'+esc(e.paid_by)+' paid · '+tm(e.ts)+' · split '+((e.split||[]).length===names.length?'everyone':(e.split||[]).map(esc).join(', '))+'</div></div><div class="ex2"><b>'+money(e.amount)+'</b>'+(e.pending?'':'<button class="x" data-a="del" data-id="'+esc(e.id)+'" aria-label="Delete">✕</button>')+'</div></div>').join('')).join(''):'<p class="muted">Nothing logged yet. Tap <b>＋ Add expense</b> after the first spend.</p>')+'</div>'+
     preHtml(list)+
-    '<p style="margin-top:14px"><button class="chip" data-a="csv">⬇️ Download CSV</button> <button class="chip" data-a="lock">🔒 Forget code on this phone</button></p></section>'+
+    '<p style="margin-top:14px"><button class="chip" data-a="invite">🔗 Copy invite link</button> <button class="chip" data-a="csv">⬇️ Download CSV</button> <button class="chip" data-a="lock">🔒 Forget code on this phone</button></p></section>'+
     '<button class="fab" data-a="open">＋ Add expense</button>'};
   const preHtml=(list)=>{list=list||[];const U=TRIP.upcoming||[],G=TRIP.groupCats||{};if(!pre.length&&!U.length)return '';
     const O=TRIP.otherCosts||[],sum=(xs,f)=>xs.reduce((a,x)=>a+f(x),0),preT=sum(pre,b=>b.amount),upT=sum(U,b=>b.amount),grand=preT+upT;
@@ -144,13 +150,14 @@ budget(){
       if(!who){er.textContent='Pick who paid.';return}if(!(amt>0)){er.textContent='Enter an amount.';return}if(!sp.length){er.textContent='Pick at least one person to split with.';return}
       me=who;ls('goa-me',me);queue.push({id:uid(),ts:Date.now(),paid_by:who,amount:Math.round(amt*100)/100,category:cat,note,split:sp,added_by:who});saveQ();close();refresh()}
     else if(a==='del'){if(confirm('Delete this expense for everyone?')){entries=entries.filter(x=>x.id!==b.dataset.id);draw();try{await api('/expenses/'+encodeURIComponent(b.dataset.id),{method:'DELETE'})}catch(x){}refresh()}}
-    else if(a==='code'){const v=document.getElementById('codein').value.trim();if(v){code=v;ls('goa-code',v);err='';draw();refresh()}}
+    else if(a==='code'){const v=document.getElementById('codein').value.trim();if(v){code=v;ls('goa-code',v);err='';draw();poll();refresh()}}
+    else if(a==='invite')invite()
     else if(a==='lock'){if(confirm('Forget the trip code on this phone?')){code='';ls('goa-code','');entries=[];ls('goa-entries','[]');draw()}}
     else if(a==='refresh')refresh();else if(a==='csv')csv()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal)close()});
-  window.addEventListener('hashchange',()=>{const m=location.hash.match(/k=([\w-]{6,64})/);if(m){code=m[1];ls('goa-code',code);err='';history.replaceState(null,'',location.pathname+location.search);draw();refresh()}});
+  window.addEventListener('hashchange',()=>{const m=linkCode();if(m){code=m;ls('goa-code',code);err='';history.replaceState(null,'',location.pathname+location.search);draw();poll();refresh()}});
   draw();
-  if(API&&code){refresh();setInterval(()=>{if(!document.hidden&&!modal)refresh()},8000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});window.addEventListener('online',refresh)}
+  if(API&&code){poll();refresh()}
 },
 outfits(){
   const O=TRIP.outfits,ph=id=>'https://images.pexels.com/photos/'+id+'/pexels-photo-'+id+'.jpeg?auto=compress&cs=tinysrgb&w=700';

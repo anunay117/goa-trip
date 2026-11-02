@@ -5,7 +5,7 @@ compatibility_date = "2025-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "goa-trip-expenses"
-database_id = "00000000-0000-0000-0000-000000000000" # replaced by `wrangler d1 create` output
+database_id = "b5b7e0ab-c0e6-4eb0-9203-4788b662ccdb"
 
 [vars]
 ALLOWED_ORIGINS = "https://anunay117.github.io"

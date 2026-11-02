@@ -93,7 +93,7 @@ const TRIP = {
     { who: "Deepak", label: "Deepak's flight (booked separately)", note: "Indigo ka Dalal" }
   ],
   groupCats: { "Car & petrol": ["Travel"], "Food & drinks": ["Food", "Drinks"], "Attractions & general": ["Activity", "Shopping", "Other", "Stay"] },
-  expenseApi: "",                 // URL of the live-expense server (Cloudflare Worker); set after deploy. Trip code is NOT stored here.
+  expenseApi: "https://goa-trip-expenses.anunay117.workers.dev",   // live-expense server (Cloudflare Worker + D1). Trip code is NOT stored here.
 
   planned: null,                  // optional: set a total target (e.g. 250000) to show a progress bar
 

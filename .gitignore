@@ -1,0 +1,6 @@
+# Cloudflare Worker local files (never commit secrets)
+worker/.dev.vars
+worker/.wrangler/
+.wrangler/
+node_modules/
+.DS_Store
