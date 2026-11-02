@@ -87,7 +87,7 @@ budget(){
     }catch(e){err=navigator.onLine===false||/Failed|fetch|Network/i.test(String(e))?'Offline or weak signal. Showing the last saved list; new entries will sync later.':'Could not reach the server, retrying.'}
     busy=false;if(!modal)draw()};
   let polling=false;
-  const poll=()=>{if(polling||!API)return;polling=true;setInterval(()=>{if(code&&!document.hidden&&!modal)refresh()},8000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});window.addEventListener('online',refresh)};
+  const poll=()=>{if(polling||!API)return;polling=true;setInterval(()=>{if(code&&!document.hidden&&!modal)refresh()},30000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});window.addEventListener('online',refresh)};
   const invite=async()=>{const u=location.origin+location.pathname+'#k='+encodeURIComponent(code);
     try{if(navigator.share){await navigator.share({title:TRIP.name+' expenses',text:'Log Goa trip spends here:',url:u});return}}catch(e){if(e&&e.name==='AbortError')return}
     try{await navigator.clipboard.writeText(u);alert('Invite link copied. Send it to the group.\n\nAnyone with this link can see and add expenses.')}catch(e){prompt('Copy this invite link:',u)}};
