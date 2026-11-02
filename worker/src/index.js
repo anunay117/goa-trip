@@ -3,7 +3,8 @@
 import { sendPush, okEndpoint } from "./push.js";
 
 const NAMES = ["Anunay", "Shruti", "Akriti", "Deepak", "Sarvpriya", "Abhishek"];
-const CATS = ["Food", "Drinks", "Travel", "Stay", "Activity", "Shopping", "Other"];
+const CATS = ["Food & drinks", "Travel", "Stay", "Activity", "Shopping", "Other"];
+const LEGACY = { Food: "Food & drinks", Drinks: "Food & drinks" };   // older app versions may still send these
 const MAX_ROWS = 5000;
 const MAX_SUBS = 40;
 const inr = n => "₹" + Math.round(n).toLocaleString("en-IN");
@@ -64,7 +65,7 @@ export default {
       const amount = Number(b.amount);
       if (!(amount > 0 && amount <= 1000000)) return json({ error: "amount must be between 0 and 10,00,000" }, 400, req, env);
       if (!NAMES.includes(b.paid_by)) return json({ error: "unknown payer" }, 400, req, env);
-      const category = CATS.includes(b.category) ? b.category : "Other";
+      const category = CATS.includes(b.category) ? b.category : (LEGACY[b.category] || "Other");
       const split = Array.isArray(b.split) ? [...new Set(b.split.filter(n => NAMES.includes(n)))] : [];
       if (!split.length) return json({ error: "pick at least one person to split with" }, 400, req, env);
       const id = clean(b.id, 64) || crypto.randomUUID();

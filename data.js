@@ -92,7 +92,7 @@ const TRIP = {
   otherCosts: [
     { who: "Deepak", label: "Deepak's flight (booked separately)", note: "Indigo ka Dalal" }
   ],
-  groupCats: { "Car & petrol": ["Travel"], "Food & drinks": ["Food", "Drinks"], "Attractions & general": ["Activity", "Shopping", "Other", "Stay"] },
+  groupCats: { "Car & petrol": ["Travel"], "Food & drinks": ["Food & drinks", "Food", "Drinks"], "Attractions & general": ["Activity", "Shopping", "Other", "Stay"] },
   expenseApi: "https://goa-trip-expenses.anunay117.workers.dev",   // live-expense server (Cloudflare Worker + D1). Trip code is NOT stored here.
   pushKey: "BC6JAZzsmcLI7HsaG4M85BQA6kiaDlmnC_ndq_LCGaW5h3G27mF4WcE9ktTB9tB8FuFQCvUKzei9D3WdjQRF0G0",   // Web Push (VAPID) public key for expense notifications; public by design.
 

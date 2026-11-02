@@ -57,8 +57,8 @@ ride(){
   '<div class="grid" style="margin-top:14px"><div class="card"><h3>📄 Documents</h3><ul style="margin-left:18px">'+r.docs.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div><div class="card"><h3>🛣️ Road rules</h3><ul style="margin-left:18px">'+r.tips.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div></div></section>';
 },
 budget(){
-  const CATS=[['Food','🍽️'],['Drinks','🍹'],['Travel','🚗'],['Stay','🏡'],['Activity','🏄'],['Shopping','🛍️'],['Other','✨']];
-  const catEmoji=Object.fromEntries(CATS);
+  const CATS=[['Food & drinks','🍽️'],['Travel','🚗'],['Stay','🏡'],['Activity','🏄'],['Shopping','🛍️'],['Other','✨']];
+  const catEmoji={...Object.fromEntries(CATS),Food:'🍽️',Drinks:'🍹'};
   const names=ppl.map(p=>p.name),pre=TRIP.budget||[];
   const lg=k=>{try{return localStorage.getItem(k)}catch(e){return null}},ls=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
   const local=location.protocol==='file:'||['localhost','127.0.0.1'].includes(location.hostname);
@@ -135,11 +135,11 @@ budget(){
     try{await navigator.clipboard.writeText(u);alert('Invite link copied. Send it to the group.\n\nAnyone with this link can see and add expenses.')}catch(e){prompt('Copy this invite link:',u)}};
   const csv=()=>{const rows=[['Date','Time','Paid by','Amount','Category','What for','Split between']].concat(all().map(e=>[day(e.ts),tm(e.ts),e.paid_by,e.amount,e.category,e.note,(e.split||[]).join(' + ')]));
     const t=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(t);a.download='goa-trip-expenses.csv';a.click()};
-  const sheet=()=>{const sel=new Set(names);let cat='Food',who=names.includes(me)?me:'';
+  const sheet=()=>{const sel=new Set(names);let cat='Food & drinks',who=names.includes(me)?me:'';
     return '<div class="sheetbg" id="sbg"><div class="sheet" role="dialog" aria-label="Add expense"><div class="mh"><b>＋ Add expense</b><button data-a="close">✕</button></div>'+
     '<p class="lab">Who paid?</p><div id="f-who">'+names.map(n=>'<button class="chip'+(n===who?' on':'')+'" data-a="who" data-v="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div>'+
     '<p class="lab">Amount (₹)</p><input id="f-amt" type="number" inputmode="decimal" min="1" step="any" placeholder="e.g. 850" autocomplete="off">'+
-    '<p class="lab">Category</p><div id="f-cat">'+CATS.map(([c,e])=>'<button class="chip'+(c===cat?' on':'')+'" data-a="cat" data-v="'+c+'">'+e+' '+c+'</button>').join('')+'</div>'+
+    '<p class="lab">Category</p><div id="f-cat">'+CATS.map(([c,e])=>'<button class="chip'+(c===cat?' on':'')+'" data-a="cat" data-v="'+esc(c)+'">'+e+' '+esc(c)+'</button>').join('')+'</div>'+
     '<p class="lab">What for? (optional)</p><input id="f-note" type="text" maxlength="80" placeholder="Dinner at the shack" autocomplete="off">'+
     '<p class="lab">Split between <span class="muted" style="font-weight:600">(everyone by default)</span></p><div id="f-split">'+names.map(n=>'<button class="chip on" data-a="sp" data-v="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div>'+
     '<div style="margin:6px 0 12px"><button class="chip" data-a="spall">Everyone</button><button class="chip" data-a="spme">Just the payer</button></div>'+
