@@ -283,8 +283,19 @@ games(){
     urgent:()=>{tone(1320,0.16,'square',0.2)},                  // last 5 seconds: higher, louder beep
     start:()=>{tone(660,0.12,'triangle',0.25);tone(990,0.18,'triangle',0.25,0.13)},
     buzzer:()=>{tone(300,0.4,'sawtooth',0.32,0,200);tone(300,0.4,'sawtooth',0.32,0.5,200);tone(260,1.1,'sawtooth',0.35,1.0,110)},  // time is up
-    win:()=>[523,659,784,1047].forEach((f,i)=>tone(f,0.22,'triangle',0.25,i*0.11))
+    win:()=>{pop(0);pop(0.18);claps(0.25,1.8)}                // party popper then a round of applause
   };
+  // Noise-based effects for the win: a popper "pop" and crowd clapping, made from filtered white noise.
+  let NB=null;
+  const noise=()=>{if(!NB){const a=AC,len=a.sampleRate;NB=a.createBuffer(1,len,a.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1}return NB};
+  const burst=(at,dur,freq,q,vol,type)=>{const a=AC;if(!a||!C.sound)return;try{const t=a.currentTime+at,src=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();
+    src.buffer=noise();src.playbackRate.value=0.8+Math.random()*0.4;f.type=type||'bandpass';f.frequency.value=freq;f.Q.value=q;
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.004);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    src.connect(f);f.connect(g);g.connect(a.destination);src.start(t,Math.random()*0.5);src.stop(t+dur+0.05)}catch(e){}};
+  const pop=at=>{burst(at,0.12,1800,0.7,0.9);tone(140,0.12,'sine',0.5,at,50);                 // the bang + low thump
+    for(let i=0;i<14;i++)burst(at+0.05+Math.random()*0.5,0.02,3000+Math.random()*4000,2,0.12+Math.random()*0.12)};  // confetti crackle
+  const claps=(at,len)=>{for(let p=0;p<6;p++){const rate=0.21+Math.random()*0.08;let t=at+Math.random()*0.15;   // 6 people clapping, each at their own pace
+      while(t<at+len){const fade=1-(t-at)/len*0.6;burst(t,0.07+Math.random()*0.04,900+Math.random()*900,1.1,(0.22+Math.random()*0.15)*fade);t+=rate*(0.85+Math.random()*0.3)}}};
   const sndBtn=()=>'<button class="chip'+(C.sound?' on':'')+'" data-g="c-sound">'+(C.sound?'🔊 Sound on':'🔇 Sound off')+'</button>';
   let T=null,deck=[],tid=null;
   const pick=()=>{const ok=x=>C.cats.includes(x.c);deck=deck.filter(ok);if(!deck.length)deck=shuffle(LIST.filter(ok));return deck.pop()};
@@ -307,7 +318,7 @@ games(){
         '<button class="btn2 alt" data-g="c-shuffle" style="margin-top:12px">🔀 Shuffle teams</button>'+
         '<p class="muted" style="margin:14px 0 6px">What to act</p>'+CATS.map(c=>'<button class="chip'+(C.cats.includes(c)?' on':'')+'" data-g="c-cat" data-c="'+esc(c)+'">'+esc(c)+'</button>').join('')+
         '<p class="muted" style="margin:12px 0 6px">Time per turn</p>'+[60,90,120].map(s=>'<button class="chip'+(C.secs===s?' on':'')+'" data-g="c-secs" data-s="'+s+'">'+s+' sec</button>').join('')+
-        '<p class="muted" style="margin:12px 0 6px">Countdown beeps for the last 15 seconds and a buzzer at time-up</p>'+sndBtn()+
+        '<p class="muted" style="margin:12px 0 6px">Countdown beeps for the last 15 seconds, a buzzer at time-up, and a party popper with applause when you guess it</p>'+sndBtn()+' <button class="chip" data-g="c-test">🎉 Test win sound</button> <button class="chip" data-g="c-testb">⏰ Test buzzer</button>'+
         '<div style="margin-top:14px"><button class="btn2" data-g="c-start"'+(ok&&C.cats.length?'':' disabled')+'>🎬 Start: '+esc(nt.name)+(na?', '+esc(na)+' acts':'')+'</button>'+(ok?'':'<span class="muted"> Both teams need at least one player.</span>')+'</div></div>'+
         '<div class="card" style="margin-top:18px"><h3>📜 How to play</h3><ul style="margin-left:18px"><li>The actor secretly sees a title, then acts it out for their own team. <b>No talking, no mouthing words, no pointing at things that spell it.</b></li><li>Show the category first: crank an old film camera for a <b>movie</b>, pretend to sing into a mic for a <b>song</b>, draw a TV box in the air for a <b>show</b>.</li><li>Hold up fingers for the number of words, then fingers again to say which word you are acting. Tap your forearm with fingers for syllables.</li><li>Guess it before the timer runs out to win 1 point. Teams take turns, and everyone gets a go at acting.</li></ul></div>';
     }else if(T.phase==='pass'){
@@ -381,6 +392,7 @@ games(){
     else if(a==='c-show'){T.phase='show'}
     else if(a==='c-skip'){T.skips--;T.item=pick()}
     else if(a==='c-go'){audio();sfx.start();T.phase='act';T.left=C.secs;stop();tid=setInterval(tick,1000)}
+    else if(a==='c-test'||a==='c-testb'){audio();if(!C.sound){C.sound=true;saveC()}setTimeout(a==='c-test'?sfx.win:sfx.buzzer,60);if(a==='c-test')return}
     else if(a==='c-sound'){C.sound=!C.sound;saveC();if(C.sound){audio();sfx.tick()}if(T&&T.phase==='act'){b.outerHTML=sndBtn();return}}
     else if(a==='c-peek'){T.peek=!T.peek}
     else if(a==='c-got'){endTurn('got')}
