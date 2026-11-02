@@ -139,3 +139,6 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
 .toes{display:flex;flex-wrap:wrap;gap:12px}.toes span{display:flex;align-items:center;gap:8px;font-weight:700;border:2px solid var(--bd);border-radius:999px;padding:4px 14px 4px 6px}.toes i{width:22px;height:22px;border-radius:50%;border:2px solid #111;display:inline-block}
 .toecard{display:grid;grid-template-columns:200px 1fr;gap:18px;align-items:center}.toecard img{width:100%;aspect-ratio:1;object-fit:cover;border:3px solid var(--bd);border-radius:14px;display:block}
 @media(max-width:560px){.toecard{grid-template-columns:1fr}}
+.fchome{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:22px}
+.fctile{text-decoration:none;color:inherit}.fctile .fph{aspect-ratio:4/3}.fctile:hover{transform:translate(-3px,-3px);box-shadow:10px 10px 0 var(--bd)}
+.fctile p{font-weight:400}.fctile h3{font-size:1.5rem}

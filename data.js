@@ -137,6 +137,26 @@ const TRIP = {
       yt: "PLJtpjlkBVF4wneUJqC9SZPhBiEBQmmEsi", ytName: "Top Hindi Rap Songs of All Time" }
   ],
 
+  // Fit Check landing view (outfits.html with no #section): description + links to the Dress and Nails sections.
+  fitcheck: {
+    tagline: "Beach-ready looks for Goa, head to toe.",
+    title: "Sun, sand and a whole lot of photos",
+    intro: [
+      "Four days of beaches, sunsets, shacks, a beach-club night and a church visit means one thing: a lot of photos. This is where we plan the looks so everyone turns up beach-ready.",
+      "Goa in early December is about 32°C and sunny in the day and a breezy 21°C at night, so think light, flowy and comfortable in sand, with a bit of sparkle for the evenings."
+    ],
+    sections: [
+      { id: "dress", title: "Dress", emoji: "👗", photo: 9783413, text: "Outfit ideas for every part of the trip: beach walks, swim, sightseeing, dinner and the big night out, with a day-by-day plan and shop links." },
+      { id: "nails", title: "Nails", emoji: "💅", photo: 11393877, text: "Beach nail art ideas with real photos, matching toe colours, and tips so your nails survive salt water and sand." }
+    ],
+    rules: [
+      "Light colours, light fabrics: cotton, linen and rayon beat the heat.",
+      "Flat sandals or slides for sand; save heels for never.",
+      "Sunglasses, a hat and sunscreen are part of every outfit.",
+      "Coordinate colours for at least one group photo at sunset."
+    ]
+  },
+
   // Fit Check page (outfit ideas). Photos are free Pexels stock photos (id = Pexels photo id); shop links are Myntra category pages and search links.
   outfits: {
     intro: "Goa in early December is hot in the day (about 32°C) and mild at night (about 21°C). Think light cotton, linen and flowy fabrics, in whatever length and style you like.",
