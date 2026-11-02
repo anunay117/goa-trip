@@ -269,13 +269,28 @@ games(){
   if(!C||!Array.isArray(C.teams)||C.teams.length!==2)C={teams:[{name:'Team Chai',m:[],pts:0},{name:'Team Feni',m:[],pts:0}],turn:0,ai:[0,0],secs:90,cats:CATS.slice(),hist:[]};
   C.teams.forEach(t=>t.m=t.m.filter(n=>names.includes(n)));
   names.filter(n=>!C.teams.some(t=>t.m.includes(n))).forEach(n=>{(C.teams[0].m.length<=C.teams[1].m.length?C.teams[0]:C.teams[1]).m.push(n)});
-  C.cats=(C.cats||[]).filter(c=>CATS.includes(c));if(!C.cats.length)C.cats=CATS.slice();
-  const saveC=()=>keep('goa-charades',{teams:C.teams,turn:C.turn,ai:C.ai,secs:C.secs,cats:C.cats,hist:C.hist.slice(-30)});
+  C.cats=(C.cats||[]).filter(c=>CATS.includes(c));if(!C.cats.length)C.cats=CATS.slice();if(C.sound===undefined)C.sound=true;
+  const saveC=()=>keep('goa-charades',{teams:C.teams,turn:C.turn,ai:C.ai,secs:C.secs,cats:C.cats,sound:C.sound,hist:C.hist.slice(-30)});
+  // Sounds are generated with the Web Audio API (no sound files). The context must be started from a tap, so it is unlocked on "start the timer".
+  let AC=null;
+  const audio=()=>{try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){AC=null}return AC};
+  const tone=(f,d,type,vol,at,f2)=>{const a=AC;if(!a||!C.sound)return;try{const t=a.currentTime+(at||0),o=a.createOscillator(),g=a.createGain();
+    o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.2,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+    o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+0.05)}catch(e){}};
+  const sfx={
+    tick:()=>tone(880,0.1,'square',0.12),                       // 15..6 seconds left: short beep each second
+    urgent:()=>{tone(1320,0.16,'square',0.2)},                  // last 5 seconds: higher, louder beep
+    start:()=>{tone(660,0.12,'triangle',0.25);tone(990,0.18,'triangle',0.25,0.13)},
+    buzzer:()=>{tone(300,0.4,'sawtooth',0.32,0,200);tone(300,0.4,'sawtooth',0.32,0.5,200);tone(260,1.1,'sawtooth',0.35,1.0,110)},  // time is up
+    win:()=>[523,659,784,1047].forEach((f,i)=>tone(f,0.22,'triangle',0.25,i*0.11))
+  };
+  const sndBtn=()=>'<button class="chip'+(C.sound?' on':'')+'" data-g="c-sound">'+(C.sound?'🔊 Sound on':'🔇 Sound off')+'</button>';
   let T=null,deck=[],tid=null;
   const pick=()=>{const ok=x=>C.cats.includes(x.c);deck=deck.filter(ok);if(!deck.length)deck=shuffle(LIST.filter(ok));return deck.pop()};
   const stop=()=>{clearInterval(tid);tid=null};
   const newTurn=()=>{stop();const ti=C.turn,tm=C.teams[ti],actor=tm.m[C.ai[ti]%tm.m.length];T={ti,actor,item:pick(),phase:'pass',skips:1,left:C.secs,peek:false}};
-  const endTurn=res=>{stop();T.phase='done';T.res=res;if(res==='got')C.teams[T.ti].pts++;
+  const endTurn=res=>{stop();T.phase='done';T.res=res;if(res==='got')C.teams[T.ti].pts++;if(res==='time')sfx.buzzer();else if(res==='got')sfx.win();
     C.hist.push({team:C.teams[T.ti].name,actor:T.actor,t:T.item.t,got:res==='got'});C.ai[T.ti]++;C.turn=1-T.ti;saveC();buzz(res==='got'?[80,60,80]:[300])};
   const words=t=>t.trim().split(/\s+/).length;
   const charades=()=>{
@@ -292,6 +307,7 @@ games(){
         '<button class="btn2 alt" data-g="c-shuffle" style="margin-top:12px">🔀 Shuffle teams</button>'+
         '<p class="muted" style="margin:14px 0 6px">What to act</p>'+CATS.map(c=>'<button class="chip'+(C.cats.includes(c)?' on':'')+'" data-g="c-cat" data-c="'+esc(c)+'">'+esc(c)+'</button>').join('')+
         '<p class="muted" style="margin:12px 0 6px">Time per turn</p>'+[60,90,120].map(s=>'<button class="chip'+(C.secs===s?' on':'')+'" data-g="c-secs" data-s="'+s+'">'+s+' sec</button>').join('')+
+        '<p class="muted" style="margin:12px 0 6px">Countdown beeps for the last 15 seconds and a buzzer at time-up</p>'+sndBtn()+
         '<div style="margin-top:14px"><button class="btn2" data-g="c-start"'+(ok&&C.cats.length?'':' disabled')+'>🎬 Start: '+esc(nt.name)+(na?', '+esc(na)+' acts':'')+'</button>'+(ok?'':'<span class="muted"> Both teams need at least one player.</span>')+'</div></div>'+
         '<div class="card" style="margin-top:18px"><h3>📜 How to play</h3><ul style="margin-left:18px"><li>The actor secretly sees a title, then acts it out for their own team. <b>No talking, no mouthing words, no pointing at things that spell it.</b></li><li>Show the category first: crank an old film camera for a <b>movie</b>, pretend to sing into a mic for a <b>song</b>, draw a TV box in the air for a <b>show</b>.</li><li>Hold up fingers for the number of words, then fingers again to say which word you are acting. Tap your forearm with fingers for syllables.</li><li>Guess it before the timer runs out to win 1 point. Teams take turns, and everyone gets a go at acting.</li></ul></div>';
     }else if(T.phase==='pass'){
@@ -300,17 +316,18 @@ games(){
       top='<div class="card"><div class="rolecard"><p>'+esc(T.item.c)+' · '+words(T.item.t)+' word'+(words(T.item.t)>1?'s':'')+'</p><h3 style="font-size:2.3rem;margin-top:8px;text-transform:none">'+esc(T.item.t)+'</h3><p style="margin-top:10px;color:var(--lime)">Memorise it. No talking from now on!</p></div>'+
         '<div style="margin-top:12px"><button class="btn2" data-g="c-go">▶️ Hide it and start the timer</button> '+(T.skips?'<button class="btn2 alt" data-g="c-skip">🔁 Too hard? Skip ('+T.skips+' left)</button>':'')+'</div></div>';
     }else if(T.phase==='act'){
-      top='<div class="card" style="text-align:center"><h3>'+esc(T.actor)+' is acting for '+esc(C.teams[T.ti].name)+'</h3><div class="big ctimer'+(T.left<=10?' low':'')+'" id="ctm">'+mm(Math.max(T.left,0))+'</div>'+
+      top='<div class="card" style="text-align:center"><h3>'+esc(T.actor)+' is acting for '+esc(C.teams[T.ti].name)+'</h3><div class="big ctimer'+(T.left<=15?' low':'')+'" id="ctm">'+mm(Math.max(T.left,0))+'</div>'+
         '<p class="muted" style="margin-bottom:10px">'+esc(T.item.c)+' · '+words(T.item.t)+' word'+(words(T.item.t)>1?'s':'')+(T.peek?' · <b style="color:var(--ink)">'+esc(T.item.t)+'</b>':'')+'</p>'+
-        '<button class="btn2" data-g="c-got" style="font-size:1.25rem">✅ They guessed it!</button> <button class="btn2 alt" data-g="c-giveup">❌ Give up</button><div><button class="chip" data-g="c-peek" style="margin-top:10px">'+(T.peek?'🙈 Hide title':'👀 Actor peek')+'</button></div></div>';
+        '<button class="btn2" data-g="c-got" style="font-size:1.25rem">✅ They guessed it!</button> <button class="btn2 alt" data-g="c-giveup">❌ Give up</button><div>'+sndBtn()+' <button class="chip" data-g="c-peek" style="margin-top:10px">'+(T.peek?'🙈 Hide title':'👀 Actor peek')+'</button></div></div>';
     }else{
       const nt=C.teams[C.turn];
       top='<div class="card"><h3>'+(T.res==='got'?'🎉 Got it! +1 for '+esc(C.teams[T.ti].name):T.res==='time'?'⏰ Time is up!':'😅 No points this time')+'</h3><p>The title was <b>'+esc(T.item.t)+'</b> <span class="muted">('+esc(T.item.c)+')</span>.</p><div style="margin-top:12px"><button class="btn2" data-g="c-start">▶️ Next: '+esc(nt.name)+'</button> <button class="btn2 alt" data-g="c-cancel">Change teams / settings</button></div></div>';
     }
     return back+top+board;
   };
-  const tick=()=>{T.left--;const el=document.getElementById('ctm');if(el){el.textContent=mm(Math.max(T.left,0));el.classList.toggle('low',T.left<=10)}
-    if(T.left===10)buzz(120);if(T.left<=0){endTurn('time');draw()}};
+  const tick=()=>{T.left--;const el=document.getElementById('ctm');if(el){el.textContent=mm(Math.max(T.left,0));el.classList.toggle('low',T.left<=15)}
+    if(T.left>5&&T.left<=15)sfx.tick();else if(T.left>0&&T.left<=5)sfx.urgent();
+    if(T.left===15)buzz(120);if(T.left<=0){endTurn('time');draw()}};
 
   /* ---------- Spin the Wheel ---------- */
   const QS=['Who pays for the next round of chai? ☕','Who picks the next song? 🎧','Who gets the front seat? 🚙','Who does the next dare? 😈','Who orders for the whole table? 🍤','Who wakes everyone up tomorrow? ⏰','Who takes the group photo? 📸','Who hits the dance floor first? 💃','Who carries the beach bag today? 🎒'];
@@ -363,7 +380,8 @@ games(){
     else if(a==='c-cancel'){stop();T=null}
     else if(a==='c-show'){T.phase='show'}
     else if(a==='c-skip'){T.skips--;T.item=pick()}
-    else if(a==='c-go'){T.phase='act';T.left=C.secs;stop();tid=setInterval(tick,1000)}
+    else if(a==='c-go'){audio();sfx.start();T.phase='act';T.left=C.secs;stop();tid=setInterval(tick,1000)}
+    else if(a==='c-sound'){C.sound=!C.sound;saveC();if(C.sound){audio();sfx.tick()}if(T&&T.phase==='act'){b.outerHTML=sndBtn();return}}
     else if(a==='c-peek'){T.peek=!T.peek}
     else if(a==='c-got'){endTurn('got')}
     else if(a==='c-giveup'){endTurn('gave')}
