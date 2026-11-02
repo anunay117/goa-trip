@@ -76,14 +76,17 @@ const TRIP = {
   },
 
   // Budget: everything is split equally between the 6 friends (Arsi is not counted).
-  budget: [                       // Pre-trip costs already paid (real). Daily spends are logged live on The Damage page, not here.
-    { cat: "Stay",   label: "Homero Villa (3 nights)", amount: 28000 },
-    { cat: "Travel", label: "Flights (IndiGo, Delhi-Goa-Delhi)", amount: 123135, exclude: ["Deepak"] },   // Deepak has a separate ticket
-    { cat: "Travel", label: "Arsi's flight (infant fare + tax)", amount: 4000, only: ["Anunay"], short: "Arsi" }   // charged to Anunay only
+  // Pre-trip costs already paid (real), all paid by Anunay. settled = everyone has paid Anunay back their share.
+  // Daily spends are logged live on The Damage page, not here.
+  budget: [
+    { cat: "Stay",   label: "Homero Villa: booking amount (half of ₹28,000)", amount: 14000, paidBy: "Anunay", settled: true },
+    { cat: "Travel", label: "Flights (IndiGo, Delhi-Goa-Delhi)", amount: 123135, exclude: ["Deepak"], paidBy: "Anunay", settled: true },   // Deepak has a separate ticket
+    { cat: "Travel", label: "Arsi's flight (infant fare + tax)", amount: 4000, only: ["Anunay"], short: "Arsi", paidBy: "Anunay" }   // charged to Anunay only
   ],
   // Still to spend. "group" rows are tracked against live logged categories (see groupCats). est = rough estimate.
   upcoming: [
-    { label: "Car rental (4 days)",                       amount: 14600, group: "Car & petrol" },
+    { label: "Villa balance (pay at check-in)",            amount: 14000, group: "Villa balance" },   // log it in the tracker (Stay) when paid
+    { label: "Car rental (4 days, quoted)",                amount: 14600, group: "Car & petrol" },
     { label: "Petrol (approx.)",                          amount: 5000,  group: "Car & petrol", est: true },
     { label: "Food & drinks (estimate)",                  amount: 50000, group: "Food & drinks", est: true },
     { label: "Attractions & general expenses (estimate)", amount: 20000, group: "Attractions & general", est: true }
@@ -92,7 +95,7 @@ const TRIP = {
   otherCosts: [
     { who: "Deepak", label: "Deepak's flight (booked separately)", note: "Indigo ka Dalal" }
   ],
-  groupCats: { "Car & petrol": ["Travel"], "Food & drinks": ["Food & drinks", "Food", "Drinks"], "Attractions & general": ["Activity", "Shopping", "Other", "Stay"] },
+  groupCats: { "Car & petrol": ["Travel"], "Food & drinks": ["Food & drinks", "Food", "Drinks"], "Attractions & general": ["Activity", "Shopping", "Other"], "Villa balance": ["Stay"] },
   expenseApi: "https://goa-trip-expenses.anunay117.workers.dev",   // live-expense server (Cloudflare Worker + D1). Trip code is NOT stored here.
   pushKey: "BC6JAZzsmcLI7HsaG4M85BQA6kiaDlmnC_ndq_LCGaW5h3G27mF4WcE9ktTB9tB8FuFQCvUKzei9D3WdjQRF0G0",   // Web Push (VAPID) public key for expense notifications; public by design.
 

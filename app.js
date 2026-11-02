@@ -168,7 +168,8 @@ budget(){
     const O=TRIP.otherCosts||[],sum=(xs,f)=>xs.reduce((a,x)=>a+f(x),0),preT=sum(pre,b=>b.amount),upT=sum(U,b=>b.amount),grand=preT+upT;
     const each=Object.fromEntries(names.map(n=>[n,0]));
     [...pre,...U].forEach(b=>{const who=names.filter(n=>b.only?b.only.includes(n):!(b.exclude||[]).includes(n));who.forEach(n=>each[n]+=b.amount/who.length)});
-    const note=b=>b.only?'<div class="muted" style="font-size:.78rem">charged to '+esc(b.only.join(', '))+' only</div>':(b.exclude&&b.exclude.length?'<div class="muted" style="font-size:.78rem">split '+(names.length-b.exclude.length)+' ways, not '+esc(b.exclude.join(', '))+'</div>':'');
+    const note0=b=>b.only?'<div class="muted" style="font-size:.78rem">charged to '+esc(b.only.join(', '))+' only</div>':(b.exclude&&b.exclude.length?'<div class="muted" style="font-size:.78rem">split '+(names.length-b.exclude.length)+' ways, not '+esc(b.exclude.join(', '))+'</div>':'');
+    const note=b=>note0(b)+(b.paidBy?'<div class="muted" style="font-size:.78rem">paid by '+esc(b.paidBy)+(b.settled?' · <b style="color:#1a8f3c">✓ everyone has paid back</b>':'')+'</div>':'');
     const groups=[...new Set(U.map(u=>u.group))];
     const rows=groups.map(g=>{const items=U.filter(u=>u.group===g),pl=sum(items,x=>x.amount),sp=sum(list.filter(e=>(G[g]||[]).includes(e.category)),e=>e.amount),pct=pl?Math.min(100,sp/pl*100):0,over=sp>pl;
       return '<div style="margin:12px 0"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(g)+'</b><b>'+money(pl)+(items.some(i=>i.est)?' <span class="muted" style="font-weight:600">'+(items.every(i=>i.est)?'est.':'incl. est.')+'</span>':'')+'</b></div><div class="muted" style="font-size:.8rem">'+items.map(i=>esc(i.label)+' '+money(i.amount)).join(' · ')+'</div>'+
