@@ -234,18 +234,18 @@ const TRIP = {
     boys: "Boys are too smart, they don't need suggestions. 😎"
   },
 
-  // Fit Check > Nails tab. photo = free Pexels stock photo id (checked by eye to match the design); pin / ig = Pinterest search and Instagram hashtag for more references.
+  // Fit Check > Nails tab. photo = free Pexels stock photo id, or img + credit for a Wikimedia Commons photo (licence needs the credit shown); all checked by eye; pin / ig = Pinterest search and Instagram hashtag for more references.
   nails: {
-    intro: "Salt water, sand, sunscreen and pool chlorine are hard on nails. Gel or BIAB on short-to-medium nails lasts the whole trip; regular polish usually chips by day 2.",
+    intro: "Salt water, sand, sunscreen and pool chlorine are hard on nails. Go for gel or acrylic extensions: they hold long nails and nail art through the whole trip, while regular polish usually chips by day 2.",
     ideas: [
       { title: "Ocean teal", emoji: "🌊", when: "All-trip beach set", photo: 10420563,
         why: "Glossy sea-blue teal that matches the Arabian Sea in every photo. Looks amazing with silver rings.",
         tips: "Almond shape looks elegant, but go a bit shorter than the photo so it survives the beach and the luggage.",
         pin: "ocean teal nails summer", ig: "oceannails" },
-      { title: "Coral beach brights", emoji: "🧡", when: "Beach days and pool time", photo: 11393877,
-        why: "Bright coral-orange is the classic beach colour. Pops on a tan and against blue water.",
-        tips: "Ask for a neon coral gel. Short, rounded nails are the most practical for sand and swimming.",
-        pin: "coral summer nails", ig: "coralnails" },
+      { title: "3D tropical flower stilettos", emoji: "🌺", when: "Beach club and the big night out", photo: 34121866,
+        why: "Long stiletto nails with raised 3D flowers and painted petals. Pure statement art, like a tropical garden on your fingertips.",
+        tips: "Ask for hibiscus or frangipani 3D flowers in coral, pink and yellow. Keep the 3D bits on 2 or 3 nails so you can still use your phone.",
+        pin: "3d flower stiletto nails tropical", ig: "3dnailart" },
       { title: "Blue French tips", emoji: "💙", when: "Airport fit to last day", photo: 12653044,
         why: "Classic French, but with a navy or cobalt tip. Clean enough for the flight and the churches, fun enough for the beach.",
         tips: "Swap navy for turquoise or coral tips if you want it more beachy. Micro French grows out neatly.",
@@ -270,18 +270,20 @@ const TRIP = {
         why: "Soft pastel shades with tiny speckles, like painted pebbles. Cute, artsy and different from everyone else's.",
         tips: "Mix two or three pastels across the nails. Speckles hide small chips really well.",
         pin: "pastel speckle nail art", ig: "nailart" },
-      { title: "Seafoam mint", emoji: "🫧", when: "Pool day and beach shacks", photo: 9649301,
-        why: "Fresh mint-green, the colour of shallow sea water. Looks amazing on a tan and with white or pastel outfits.",
-        tips: "Do white 'sea foam' wave tips over the mint for a full ocean look.",
-        pin: "seafoam mint nails summer", ig: "mintnails" },
+      { title: "Ocean water marble", emoji: "🌊", when: "Beach days and sunset photos", img: "https://upload.wikimedia.org/wikipedia/commons/a/a7/Poto_nail_art_678.jpg",
+        credit: { by: "Yarden kedem", lic: "CC BY-SA 4.0", licUrl: "https://creativecommons.org/licenses/by-sa/4.0", url: "https://commons.wikimedia.org/wiki/File:Poto_nail_art_678.jpg" },
+        why: "Swirly marble in sea-blue, white and soft pink, like waves mixing with the sunset. Every nail comes out different.",
+        tips: "Go long oval or almond so the swirls have room. Ask for 'water marble' or 'blooming gel' in aqua, white and coral.",
+        pin: "ocean water marble nails long", ig: "marblenails" },
       { title: "Neon glow party nails", emoji: "🪩", when: "Night out / beach club", photo: 5871831,
         why: "Neon art that glows under the club's UV lights. Made for the big night in Goa.",
         tips: "Ask the salon for UV-reactive or neon gel, and do a neon line design on a few nails.",
         pin: "neon nail art", ig: "neonnails" },
-      { title: "Cherry red tropical", emoji: "🍹", when: "Cocktails at the beach club", photo: 12698349,
-        why: "Glossy cherry red, the classic holiday nail. Pops in every photo with a piña colada or a coconut.",
-        tips: "Add one accent nail with a tiny white hibiscus or palm design to make it more tropical.",
-        pin: "red tropical vacation nails", ig: "vacationnails" }
+      { title: "Watermelon summer", emoji: "🍉", when: "Pool day and beach shacks", img: "https://upload.wikimedia.org/wikipedia/commons/9/95/Watermelon_nails_%284494973509%29.jpg",
+        credit: { by: "Courtney Rhodes", lic: "CC BY 2.0", licUrl: "https://creativecommons.org/licenses/by/2.0", url: "https://commons.wikimedia.org/wiki/File:Watermelon_nails_(4494973509).jpg" },
+        why: "Pink watermelon flesh with black seeds and a green rind tip. Fun, juicy and peak beach-holiday energy.",
+        tips: "On long coffin or almond nails, do the full watermelon on 2 accent nails and plain pink with seeds on the rest.",
+        pin: "watermelon nail art long", ig: "watermelonnails" }
     ],
     toesPhoto: 8981504,
     toes: [
@@ -291,7 +293,7 @@ const TRIP = {
     tips: [
       "Book the salon for Mon 30 Nov or Tue 1 Dec, so the nails are fresh but have set before the 3 Dec flight.",
       "Gel or BIAB survives salt water and sand much better than regular polish.",
-      "Keep length short to medium. Long acrylics and sea, sand, and suitcases don't mix.",
+      "Going long? Ask for a strong acrylic or hard-gel base, and get a refill check if you go swimming a lot.",
       "Pack a mini nail file, cuticle oil and a clear top coat for quick fixes.",
       "Sunscreen and chlorine can yellow pale shades. A UV-protective top coat helps.",
       "Do a matching pedicure. Toes are in every beach photo too."
