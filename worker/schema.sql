@@ -19,3 +19,18 @@ CREATE TABLE IF NOT EXISTS subs (
   name      TEXT NOT NULL DEFAULT '',
   created   INTEGER NOT NULL
 );
+
+-- Settle-up payments between two people. A payment counts in balances only once the receiver confirms it.
+CREATE TABLE IF NOT EXISTS settlements (
+  id          TEXT PRIMARY KEY,
+  ts          INTEGER NOT NULL,
+  from_name   TEXT NOT NULL,
+  to_name     TEXT NOT NULL,
+  amount      REAL NOT NULL,
+  method      TEXT NOT NULL DEFAULT '',
+  note        TEXT NOT NULL DEFAULT '',
+  status      TEXT NOT NULL DEFAULT 'pending',   -- pending | confirmed | rejected
+  created_by  TEXT NOT NULL DEFAULT '',
+  decided_at  INTEGER,
+  deleted     INTEGER NOT NULL DEFAULT 0
+);

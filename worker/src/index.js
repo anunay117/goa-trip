@@ -22,6 +22,21 @@ async function notifyAll(env, msg, skipEndpoint) {
   }));
 }
 
+// Notify only the phones registered to the given people (by the name picked when turning notifications on).
+async function notifyPeople(env, people, msg) {
+  if (!env.VAPID_PRIVATE_JWK || !env.VAPID_PUBLIC || !people.length) return;
+  const { results } = await env.DB.prepare("SELECT * FROM subs").all();
+  await Promise.all(results.filter(s => people.includes(s.name)).map(async s => {
+    try {
+      const st = await sendPush(s, msg, env);
+      if (st === 404 || st === 410) await env.DB.prepare("DELETE FROM subs WHERE endpoint = ?").bind(s.endpoint).run();
+      else if (st >= 300) console.log("push failed", st, new URL(s.endpoint).hostname);
+    } catch (e) { console.log("push error", String(e)); }
+  }));
+}
+const METHODS = ["UPI", "Cash", "Bank transfer", "Other"];
+const srow = r => ({ id: r.id, ts: r.ts, from: r.from_name, to: r.to_name, amount: r.amount, method: r.method, note: r.note, status: r.status, created_by: r.created_by, decided_at: r.decided_at });
+
 const cors = (req, env) => {
   const allowed = String(env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
   const o = req.headers.get("Origin");
@@ -56,8 +71,11 @@ export default {
     if (!safeEqual(req.headers.get("X-Trip-Code"), env.TRIP_CODE)) return json({ error: "wrong trip code" }, 401, req, env);
 
     if (url.pathname === "/expenses" && req.method === "GET") {
-      const { results } = await env.DB.prepare("SELECT * FROM expenses WHERE deleted = 0 ORDER BY ts DESC LIMIT ?").bind(MAX_ROWS).all();
-      return json({ now: Date.now(), entries: results.map(row) }, 200, req, env);
+      const [{ results }, st] = await env.DB.batch([
+        env.DB.prepare("SELECT * FROM expenses WHERE deleted = 0 ORDER BY ts DESC LIMIT ?").bind(MAX_ROWS),
+        env.DB.prepare("SELECT * FROM settlements WHERE deleted = 0 ORDER BY ts DESC LIMIT 500")
+      ]);
+      return json({ now: Date.now(), entries: results.map(row), settlements: st.results.map(srow) }, 200, req, env);
     }
 
     if (url.pathname === "/expenses" && req.method === "POST") {
@@ -105,6 +123,49 @@ export default {
       const st = await sendPush(s, { title: "🔔 Notifications are on", body: "You'll get a ping like this whenever someone logs a Goa trip expense.", tag: "test", url: "budget.html" }, env);
       if (st === 404 || st === 410) await env.DB.prepare("DELETE FROM subs WHERE endpoint = ?").bind(ep).run();
       return json({ ok: st < 300, status: st }, st < 300 ? 200 : 502, req, env);
+    }
+
+    // ---- Settle up ----
+    if (url.pathname === "/settlements" && req.method === "POST") {
+      let b; try { b = await req.json(); } catch { return json({ error: "bad json" }, 400, req, env); }
+      const amount = Math.round(Number(b.amount) * 100) / 100;
+      if (!(amount > 0 && amount <= 1000000)) return json({ error: "amount must be between 0 and 10,00,000" }, 400, req, env);
+      if (!NAMES.includes(b.from) || !NAMES.includes(b.to) || b.from === b.to) return json({ error: "pick who paid and who received" }, 400, req, env);
+      if (!NAMES.includes(b.by)) return json({ error: "tell us who you are" }, 400, req, env);
+      const n = await env.DB.prepare("SELECT COUNT(*) AS c FROM settlements").first();
+      if (n.c >= 500) return json({ error: "too many settle-ups" }, 400, req, env);
+      const id = clean(b.id, 64) || crypto.randomUUID(), method = METHODS.includes(b.method) ? b.method : "Other";
+      const status = b.by === b.to ? "confirmed" : "pending";      // the receiver recording it needs no approval
+      const ins = await env.DB.prepare("INSERT OR IGNORE INTO settlements (id, ts, from_name, to_name, amount, method, note, status, created_by, decided_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        .bind(id, Date.now(), b.from, b.to, amount, method, clean(b.note, 80), status, b.by, status === "confirmed" ? Date.now() : null).run();
+      if (ins.meta && ins.meta.changes > 0) {
+        if (status === "pending") ctx.waitUntil(notifyPeople(env, [b.to], {
+          title: "🤝 " + b.from + " says they paid you " + inr(amount),
+          body: "Via " + method + (b.by !== b.from ? " (recorded by " + b.by + ")" : "") + ". Tap to confirm you received it.",
+          tag: "settle-" + id, url: "budget.html#s=" + id }));
+        else ctx.waitUntil(notifyPeople(env, [b.from], {
+          title: "✅ " + b.to + " marked your " + inr(amount) + " as received",
+          body: "Your balance is updated. Thanks for settling up!", tag: "settle-" + id, url: "budget.html#s=" + id }));
+      }
+      return json({ ok: true, id, status }, 201, req, env);
+    }
+    const sm = url.pathname.match(/^\/settlements\/([\w-]{1,64})(\/decide)?$/);
+    if (sm && req.method === "POST" && sm[2]) {
+      let b; try { b = await req.json(); } catch { return json({ error: "bad json" }, 400, req, env); }
+      const s = await env.DB.prepare("SELECT * FROM settlements WHERE id = ? AND deleted = 0").bind(sm[1]).first();
+      if (!s) return json({ error: "not found" }, 404, req, env);
+      if (b.by !== s.to_name) return json({ error: "only " + s.to_name + " can confirm this" }, 403, req, env);
+      if (s.status !== "pending") return json({ ok: true, status: s.status }, 200, req, env);
+      const status = b.decision === "confirm" ? "confirmed" : "rejected";
+      await env.DB.prepare("UPDATE settlements SET status = ?, decided_at = ? WHERE id = ? AND status = 'pending'").bind(status, Date.now(), s.id).run();
+      ctx.waitUntil(notifyPeople(env, [s.from_name, s.created_by].filter((x, i, a) => x !== s.to_name && a.indexOf(x) === i), status === "confirmed"
+        ? { title: "✅ " + s.to_name + " confirmed your " + inr(s.amount), body: "Settled! Your balance is updated.", tag: "settle-" + s.id, url: "budget.html#s=" + s.id }
+        : { title: "❌ " + s.to_name + " says they did not receive " + inr(s.amount), body: "Check with " + s.to_name + " and try again.", tag: "settle-" + s.id, url: "budget.html#s=" + s.id }));
+      return json({ ok: true, status }, 200, req, env);
+    }
+    if (sm && req.method === "DELETE" && !sm[2]) {
+      await env.DB.prepare("UPDATE settlements SET deleted = 1 WHERE id = ?").bind(sm[1]).run();
+      return json({ ok: true }, 200, req, env);
     }
 
     const m = url.pathname.match(/^\/expenses\/([\w-]{1,64})$/);

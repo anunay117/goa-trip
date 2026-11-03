@@ -65,7 +65,11 @@ budget(){
   const API=((local&&new URLSearchParams(location.search).get('api'))||(TRIP.expenseApi||'')).replace(/\/$/,'');
   const linkCode=()=>{const m=location.hash.match(/k=([^&]{1,200})/);if(!m)return '';try{return decodeURIComponent(m[1]).trim()}catch(e){return ''}};
   const hm=linkCode();if(hm){ls('goa-code',hm);history.replaceState(null,'',location.pathname+location.search)}
-  let code=lg('goa-code')||'',entries=[],queue=[],err='',lastOk=0,me=lg('goa-me')||'',busy=false,modal=false;
+  let code=lg('goa-code')||'',entries=[],queue=[],err='',lastOk=0,me=lg('goa-me')||'',busy=false,modal=false,setts=[],S={};
+  try{setts=JSON.parse(lg('goa-setts')||'[]')}catch(e){}
+  // Who this phone belongs to (shared with the notifications card). Used to show approve buttons to the receiver only.
+  const ME=()=>P.name||lg('goa-push-name')||'';
+  const setME=n=>{P.name=n;ls('goa-push-name',n)};
   try{entries=JSON.parse(lg('goa-entries')||'[]')}catch(e){}
   try{queue=JSON.parse(lg('goa-queue')||'[]')}catch(e){}
   const saveQ=()=>ls('goa-queue',JSON.stringify(queue));
@@ -74,7 +78,9 @@ budget(){
   const all=()=>{const ids=new Set(entries.map(e=>e.id));return [...queue.filter(q=>!ids.has(q.id)).map(q=>({...q,pending:true})),...entries].sort((a,b)=>b.ts-a.ts)};
   const calc=list=>{const net=Object.fromEntries(names.map(n=>[n,0])),paid={...net},share={...net};
     list.forEach(e=>{const w=(e.split||[]).filter(n=>n in net);if(!w.length||!(e.paid_by in net))return;paid[e.paid_by]+=e.amount;w.forEach(n=>share[n]+=e.amount/w.length)});
-    names.forEach(n=>net[n]=paid[n]-share[n]);return {net,paid,share}};
+    const sett=Object.fromEntries(names.map(n=>[n,0]));
+    setts.filter(x=>x.status==='confirmed').forEach(x=>{if(x.from in sett&&x.to in sett){sett[x.from]+=x.amount;sett[x.to]-=x.amount}});
+    names.forEach(n=>net[n]=paid[n]-share[n]+sett[n]);return {net,paid,share,sett}};
   const settle=net=>{const d=names.filter(n=>net[n]<-.5).map(n=>({n,a:-net[n]})).sort((a,b)=>b.a-a.a),c=names.filter(n=>net[n]>.5).map(n=>({n,a:net[n]})).sort((a,b)=>b.a-a.a),out=[];
     for(let i=0,j=0;i<d.length&&j<c.length;){const m=Math.min(d[i].a,c[j].a);out.push([d[i].n,c[j].n,m]);d[i].a-=m;c[j].a-=m;if(d[i].a<.5)i++;if(c[j].a<.5)j++}return out};
   // Expense notifications (Web Push). iPhones only allow this inside the home-screen app (iOS 16.4+).
@@ -125,7 +131,7 @@ budget(){
     try{
       for(const q of queue.slice()){const r=await api('/expenses',{method:'POST',body:JSON.stringify(P.ep?{...q,skip:P.ep}:q)});if(r.ok||r.status===400){queue=queue.filter(x=>x.id!==q.id);saveQ()}else if(r.status===401)throw new Error('401')}
       const r=await api('/expenses');if(r.status===401){code='';ls('goa-code','');err='That trip code was not accepted. Ask Anunay for the right one.';busy=false;return draw()}
-      if(!r.ok)throw new Error(r.status);const d=await r.json();entries=d.entries;ls('goa-entries',JSON.stringify(entries));lastOk=Date.now();err='';
+      if(!r.ok)throw new Error(r.status);const d=await r.json();entries=d.entries;ls('goa-entries',JSON.stringify(entries));if(Array.isArray(d.settlements)){setts=d.settlements;ls('goa-setts',JSON.stringify(setts))}lastOk=Date.now();err='';
     }catch(e){err=navigator.onLine===false||/Failed|fetch|Network/i.test(String(e))?'Offline or weak signal. Showing the last saved list; new entries will sync later.':'Could not reach the server, retrying.'}
     busy=false;if(!modal)draw()};
   let polling=false;
@@ -147,23 +153,56 @@ budget(){
   const draw=()=>{
     if(!API){$('#app').innerHTML=head('The Damage 💸','Live expense tracker')+'<section class="wrap"><div class="card"><h3>📲 Live expense logging is coming</h3><p class="muted">Soon everyone will log spends here from their phone and the totals will update for all of us. For now, here is the plan.</p></div>'+preHtml()+'</section>';return}
     if(!code){$('#app').innerHTML=head('The Damage 💸','Everyone logs spends here. Totals update live.')+'<section class="wrap"><div class="card"><h3>🔐 Enter the trip code</h3><p class="muted" style="margin-bottom:10px">Ask Anunay for the code, or open the special link they shared and it will fill in automatically.</p>'+(err?'<p class="ferr">'+esc(err)+'</p>':'')+'<input id="codein" type="password" placeholder="Trip code" autocomplete="off"><button class="btn2" data-a="code">Unlock</button></div>'+preHtml()+'</section>';return}
-    const list=all(),{net,paid,share}=calc(list),isPre=e=>/^pre-/.test(e.id||''),spend=list.filter(e=>!isPre(e)),total=spend.reduce((a,e)=>a+e.amount,0);
+    const list=all(),{net,paid,share,sett}=calc(list),isPre=e=>/^pre-/.test(e.id||''),spend=list.filter(e=>!isPre(e)),total=spend.reduce((a,e)=>a+e.amount,0);
     const today=day(Date.now()),todayTotal=spend.filter(e=>day(e.ts)===today).reduce((a,e)=>a+e.amount,0);
     const cats={};spend.forEach(e=>cats[e.category]=(cats[e.category]||0)+e.amount);const mx=Math.max(...Object.values(cats),1);
     const groups={};list.forEach(e=>{(groups[day(e.ts)]=groups[day(e.ts)]||[]).push(e)});
     const st=settle(net),sc=err?'⚠️ '+esc(err):'<span class="dot"></span> Live · updated '+(lastOk?tm(lastOk):'now');
     $('#app').innerHTML=head('The Damage 💸','Log every spend. Totals and balances update for everyone.')+'<section class="wrap">'+
-    '<div class="livebar">'+sc+'<button class="chip" data-a="refresh">↻ Refresh</button></div>'+pushHtml()+
+    '<div class="livebar">'+sc+'<button class="chip" data-a="refresh">↻ Refresh</button></div>'+pushHtml()+approvals()+
     '<div class="grid"><div class="card"><div class="muted">Spent on the trip</div><div class="big">'+money(total)+'</div><div class="muted" style="font-size:.85rem">'+spend.length+' expense'+(spend.length===1?'':'s')+' logged</div></div>'+
     '<div class="card"><div class="muted">Today</div><div class="big">'+money(todayTotal)+'</div><div class="muted" style="font-size:.85rem">'+esc(today)+'</div></div></div>'+
     '<div class="card" style="margin-top:16px"><h3>👥 Everyone\'s balance</h3><p class="muted" style="font-size:.82rem;margin-bottom:6px">Share = what each person owes of the logged spends. Net = paid minus share.</p>'+
-    names.map(n=>{const v=Math.round(net[n]);return '<div class="bal"><b>'+esc(n)+'</b><span class="muted">paid '+money(paid[n])+' · share '+money(share[n])+'</span><b class="'+(v>0?'pos':v<0?'neg':'')+'">'+(v>0?'gets back '+money(v):v<0?'owes '+money(-v):'all square')+'</b></div>'}).join('')+
-    (st.length?'<details style="margin-top:10px"><summary>💸 Who pays whom (fewest transfers)</summary><ul style="margin:8px 0 0 18px">'+st.map(s=>'<li><b>'+esc(s[0])+'</b> pays <b>'+esc(s[1])+'</b> '+money(s[2])+'</li>').join('')+'</ul></details>':'')+'</div>'+
+    names.map(n=>{const v=Math.round(net[n]);return '<div class="bal"><b>'+esc(n)+'</b><span class="muted">paid '+money(paid[n])+' · share '+money(share[n])+(Math.round(sett[n])?' · settled '+(sett[n]>0?'+':'−')+money(Math.abs(sett[n])):'')+'</span><b class="'+(v>0?'pos':v<0?'neg':'')+'">'+(v>0?'gets back '+money(v):v<0?'owes '+money(-v):'all square')+'</b></div>'}).join('')+
+    '<h4 style="margin:14px 0 4px">💸 Who pays whom</h4>'+(st.length?st.map(s=>{const pend=setts.find(x=>x.status==='pending'&&x.from===s[0]&&x.to===s[1]);
+      return '<div class="owe"><span><b>'+esc(s[0])+'</b> pays <b>'+esc(s[1])+'</b> '+money(s[2])+'</span>'+(pend?'<span class="tag">⏳ '+money(pend.amount)+' waiting for '+esc(s[1])+'</span>':'<button class="chip on" data-a="stl" data-f="'+esc(s[0])+'" data-t="'+esc(s[1])+'" data-m="'+Math.round(s[2])+'">🤝 Settle up</button>')+'</div>'}).join(''):'<p class="muted">Everyone is all square 🎉</p>')+
+    '<p style="margin-top:8px"><button class="chip" data-a="stl">＋ Record another payment</button></p></div>'+
     (Object.keys(cats).length?'<div class="card" style="margin-top:16px"><h3>By category</h3>'+Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<div style="margin:10px 0"><div style="display:flex;justify-content:space-between"><span>'+(catEmoji[k]||'')+' '+esc(k)+'</span><b>'+money(v)+'</b></div><div class="bar"><i style="width:'+v/mx*100+'%"></i></div></div>').join('')+'</div>':'')+
     '<div class="card" style="margin-top:16px"><h3>🧾 Expenses</h3>'+(list.length?Object.entries(groups).map(([d,es])=>'<div class="dayh">'+esc(d)+' · '+money(es.reduce((a,e)=>a+e.amount,0))+'</div>'+es.map(e=>'<div class="exp"><div class="ex1"><b>'+(catEmoji[e.category]||'✨')+' '+esc(e.note||e.category)+'</b>'+(e.pending?' <span class="tag">⏳ syncing</span>':'')+(isPre(e)?' <span class="tag">pre-trip</span>':'')+'<div class="muted" style="font-size:.8rem">'+esc(e.paid_by)+' paid · '+tm(e.ts)+' · split '+((e.split||[]).length===names.length?'everyone':(e.split||[]).map(esc).join(', '))+'</div></div><div class="ex2"><b>'+money(e.amount)+'</b>'+(e.pending?'':'<button class="x" data-a="del" data-id="'+esc(e.id)+'" aria-label="Delete">✕</button>')+'</div></div>').join('')).join(''):'<p class="muted">Nothing logged yet. Tap <b>＋ Add expense</b> after the first spend.</p>')+'</div>'+
     preHtml(list)+
     '<p style="margin-top:14px"><button class="chip" data-a="invite">🔗 Copy invite link</button> <button class="chip" data-a="csv">⬇️ Download CSV</button> <button class="chip" data-a="lock">🔒 Forget code on this phone</button></p></section>'+
-    '<button class="fab" data-a="open">＋ Add expense</button>'};
+    settHist()+'<button class="fab" data-a="open">＋ Add expense</button>'};
+  const stLabel=x=>x.status==='confirmed'?'✅ confirmed':x.status==='rejected'?'❌ not received':'⏳ waiting for '+esc(x.to);
+  const approvals=()=>{const me=ME(),pend=setts.filter(x=>x.status==='pending');if(!pend.length)return '';
+    return pend.map(x=>{const mine=me===x.to,sent=me===x.from||me===x.created_by;
+      if(mine)return '<div class="card appr" id="st-'+esc(x.id)+'"><h3>🤝 '+esc(x.from)+' says they paid you '+money(x.amount)+'</h3><p class="muted">Via '+esc(x.method)+(x.note?' · '+esc(x.note):'')+(x.created_by!==x.from?' · recorded by '+esc(x.created_by):'')+' · '+esc(day(x.ts))+' '+esc(tm(x.ts))+'</p>'+
+        '<div style="margin-top:10px"><button class="btn2" data-a="sok" data-id="'+esc(x.id)+'">✅ Yes, received</button> <button class="btn2 alt" data-a="sno" data-id="'+esc(x.id)+'">❌ Not received</button></div></div>';
+      if(sent)return '<div class="card appr wait" id="st-'+esc(x.id)+'"><b>⏳ Waiting for '+esc(x.to)+' to confirm '+money(x.amount)+'</b><button class="chip" data-a="sdel" data-id="'+esc(x.id)+'">Cancel</button></div>';
+      return ''}).join('')};
+  const settHist=()=>!setts.length?'':'<div class="card" style="margin-top:16px"><h3>🤝 Settle-ups</h3>'+setts.map(x=>'<div class="exp" id="sh-'+esc(x.id)+'"><div class="ex1"><b>'+esc(x.from)+' → '+esc(x.to)+'</b> <span class="tag">'+stLabel(x)+'</span><div class="muted" style="font-size:.8rem">'+esc(x.method)+(x.note?' · '+esc(x.note):'')+' · '+esc(day(x.ts))+' '+esc(tm(x.ts))+'</div></div><div class="ex2"><b>'+money(x.amount)+'</b><button class="x" data-a="sdel" data-id="'+esc(x.id)+'" aria-label="Delete">✕</button></div></div>').join('')+'<p class="muted" style="font-size:.8rem;margin-top:8px">A payment counts in the balances only after the person who received it confirms.</p></div>';
+  const stSheet=()=>{const me=ME(),f=S.from,t=S.to,toMe=me&&me===t;
+    return '<div class="sheetbg" id="sbg"><div class="sheet" role="dialog" aria-label="Settle up"><div class="mh"><b>🤝 Settle up</b><button data-a="close">✕</button></div>'+
+    (me?'':'<p class="lab">First, who are you? <span class="muted" style="font-weight:600">(remembered on this phone)</span></p><div>'+names.map(n=>'<button class="chip" data-a="sme" data-v="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div>')+
+    '<p class="lab">Who paid?</p><div>'+names.map(n=>'<button class="chip'+(n===f?' on':'')+'" data-a="sf" data-v="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div>'+
+    '<p class="lab">Who received it?</p><div>'+names.map(n=>'<button class="chip'+(n===t?' on':'')+'" data-a="st" data-v="'+esc(n)+'"'+(n===f?' disabled':'')+'>'+esc(n)+'</button>').join('')+'</div>'+
+    '<p class="lab">Amount (₹)</p><input id="s-amt" type="number" inputmode="decimal" min="1" step="any" value="'+esc(S.amount||'')+'" placeholder="e.g. 2333">'+
+    '<p class="lab">How?</p><div>'+['UPI','Cash','Bank transfer'].map(m=>'<button class="chip'+(m===S.method?' on':'')+'" data-a="sm" data-v="'+m+'">'+m+'</button>').join('')+'</div>'+
+    '<p class="lab">Note (optional)</p><input id="s-note" type="text" maxlength="80" value="'+esc(S.note||'')+'" placeholder="GPay ref, villa share…">'+
+    '<p id="s-err" class="ferr">'+esc(S.err||'')+'</p><button class="btn2" data-a="ssave"'+(S.busy?' disabled':'')+'>'+(S.busy?'Sending…':toMe?'✅ Record as received':t?'📨 Send to '+esc(t)+' to confirm':'Save')+'</button>'+
+    (t&&!toMe?'<p class="muted" style="font-size:.8rem;margin-top:8px">'+esc(t)+' gets a notification and confirms. It counts in the balances only after that.</p>':'')+'</div></div>'};
+  const reSheet=()=>{const a=document.getElementById('s-amt'),n=document.getElementById('s-note');if(a)S.amount=a.value;if(n)S.note=n.value;const o=document.getElementById('sbg');if(o)o.outerHTML=stSheet()};
+  const openSettle=(f,t,m)=>{S={from:f||ME()||'',to:t||'',amount:m||'',method:'UPI',note:'',err:''};modal=true;document.body.insertAdjacentHTML('beforeend',stSheet());document.body.style.overflow='hidden'};
+  const saveSettle=async()=>{reSheet();const me=ME(),amt=parseFloat(S.amount);
+    S.err=!me?'Pick who you are first.':!S.from||!S.to?'Pick who paid and who received.':S.from===S.to?'Pick two different people.':!(amt>0)?'Enter an amount.':'';
+    if(S.err)return reSheet();S.busy=true;reSheet();
+    try{const r=await api('/settlements',{method:'POST',body:JSON.stringify({id:uid(),from:S.from,to:S.to,amount:Math.round(amt*100)/100,method:S.method,note:S.note,by:me})});
+      const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||('server said '+r.status));S.busy=false;close();refresh()}
+    catch(e){S.busy=false;S.err=navigator.onLine===false?'You are offline. Try again when you have signal.':'Could not save: '+(e.message||e);reSheet()}};
+  const decide=async(id,decision)=>{const x=setts.find(y=>y.id===id);if(!x)return;
+    if(decision==='reject'&&!confirm('Tell '+x.from+' you did not receive '+money(x.amount)+'?'))return;
+    try{const r=await api('/settlements/'+encodeURIComponent(id)+'/decide',{method:'POST',body:JSON.stringify({by:ME(),decision})});
+      const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||r.status);x.status=d.status||x.status;draw();refresh()}
+    catch(e){alert('Could not update: '+(e.message||e))}};
   const preHtml=(list)=>{list=list||[];const U=TRIP.upcoming||[],G=TRIP.groupCats||{};if(!pre.length&&!U.length)return '';
     const O=TRIP.otherCosts||[],sum=(xs,f)=>xs.reduce((a,x)=>a+f(x),0),preT=sum(pre,b=>b.amount),upT=sum(U,b=>b.amount),grand=preT+upT;
     const each=Object.fromEntries(names.map(n=>[n,0]));
@@ -200,12 +239,23 @@ budget(){
     else if(a==='poff'){if(confirm('Turn off expense notifications on this phone?'))pushOff()}
     else if(a==='ptest'){if(!P.busy&&P.ep)pushTest()}
     else if(a==='lock'){if(confirm('Forget the trip code on this phone?')){code='';ls('goa-code','');entries=[];ls('goa-entries','[]');draw()}}
-    else if(a==='refresh')refresh();else if(a==='csv')csv()});
+    else if(a==='refresh')refresh();else if(a==='csv')csv()
+    else if(a==='stl')openSettle(b.dataset.f,b.dataset.t,b.dataset.m)
+    else if(a==='sme'){setME(b.dataset.v);if(!S.from)S.from=b.dataset.v;reSheet()}
+    else if(a==='sf'){S.from=b.dataset.v;if(S.to===S.from)S.to='';reSheet()}
+    else if(a==='st'){S.to=b.dataset.v;reSheet()}
+    else if(a==='sm'){S.method=b.dataset.v;reSheet()}
+    else if(a==='ssave'){if(!S.busy)saveSettle()}
+    else if(a==='sok')decide(b.dataset.id,'confirm');else if(a==='sno')decide(b.dataset.id,'reject')
+    else if(a==='sdel'){const x=setts.find(y=>y.id===b.dataset.id);if(x&&confirm(x.status==='pending'?'Cancel this settle-up?':'Delete this settle-up for everyone?')){setts=setts.filter(y=>y.id!==x.id);draw();try{await api('/settlements/'+encodeURIComponent(x.id),{method:'DELETE'})}catch(e){}refresh()}}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal)close()});
   window.addEventListener('hashchange',()=>{const m=linkCode();if(m){code=m;ls('goa-code',code);err='';history.replaceState(null,'',location.pathname+location.search);draw();poll();refresh()}});
   draw();
   if(API&&code){poll();refresh()}
   checkPush().then(()=>{if(!modal&&code)draw()});
+  let jump=(location.hash.match(/s=([\w-]{1,64})/)||[])[1];
+  const doJump=()=>{if(!jump)return;const el=document.getElementById('st-'+jump)||document.getElementById('sh-'+jump);if(el){el.scrollIntoView({block:'center'});el.classList.add('flash');jump=''}};
+  setInterval(doJump,700);window.addEventListener('hashchange',()=>{const m=location.hash.match(/s=([\w-]{1,64})/);if(m){jump=m[1];refresh()}});
 },
 outfits(){
   const O=TRIP.outfits,ph=id=>'https://images.pexels.com/photos/'+id+'/pexels-photo-'+id+'.jpeg?auto=compress&cs=tinysrgb&w=700';

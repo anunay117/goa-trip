@@ -150,3 +150,8 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
 @media(prefers-reduced-motion:reduce){.ctimer.low{animation:none}}
 .pcard{margin:0 0 16px}.pcard.on{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--lime);color:#111}.pcard.on .chip{margin:2px 0 2px 6px}.pcard.on p{flex-basis:100%;margin:0}
 .pcard ol li{margin:4px 0}
+.owe{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 0;border-top:2px dashed var(--bd)}
+.appr{margin:0 0 16px;background:var(--yellow);color:#111;border-color:#111}.appr .muted{color:#333}
+.appr.wait{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);color:var(--ink)}
+.flash{animation:flash 1.2s 2}@keyframes flash{50%{box-shadow:0 0 0 6px var(--pink)}}
+.chip:disabled{opacity:.35;cursor:not-allowed}
