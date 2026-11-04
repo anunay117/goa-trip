@@ -160,3 +160,4 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
 .pay.pp{background:#5f259f}.pay.gp{background:#1a73e8}
 .upis{display:flex;flex-wrap:wrap;gap:6px}.upis span{border:2px solid var(--bd);border-radius:999px;padding:2px 10px;font-weight:700;font-size:.85rem;opacity:.55}.upis span.on{opacity:1;background:var(--lime);color:#111}
 .upirow{display:flex;gap:8px;align-items:center}.upirow input{flex:1;min-width:0}.upirow .btn2{margin:0}
+.payhint{flex-basis:100%;font-size:.8rem;color:var(--muted)}

@@ -175,7 +175,7 @@ budget(){
     settHist()+upiCard()};
   // UPI deep links: PhonePe and Google Pay open with the receiver's UPI ID, amount and note filled in.
   const upiQ=(to,amt)=>'pa='+encodeURIComponent(upis[to]).replace(/%40/g,'@')+'&pn='+encodeURIComponent(to)+'&am='+(Math.round(amt*100)/100).toFixed(2)+'&cu=INR&tn='+encodeURIComponent('Goa trip settle up');
-  const payBtns=(from,to,amt)=>{const me=ME();if(!upis[to]||me===to||(me&&me!==from))return '';/* only on your own debts */const d=' data-f="'+esc(from)+'" data-t="'+esc(to)+'" data-m="'+Math.round(amt)+'"';
+  const payBtns=(from,to,amt)=>{const me=ME();if(me&&me===to)return '<div class="payhint">'+(upis[to]?'💳 '+esc(from)+' sees <b>Pay with PhonePe / Google Pay</b> here on their phone.':'💳 Add your UPI ID below so '+esc(from)+' can pay you in one tap.')+'</div>';if(!upis[to]||(me&&me!==from))return '';/* only on your own debts */const d=' data-f="'+esc(from)+'" data-t="'+esc(to)+'" data-m="'+Math.round(amt)+'"';
     return '<div class="paybtns"><a class="pay pp" data-a="upi" data-app="PhonePe"'+d+' href="phonepe://pay?'+upiQ(to,amt)+'">Pay with PhonePe</a><a class="pay gp" data-a="upi" data-app="Google Pay"'+d+' href="tez://upi/pay?'+upiQ(to,amt)+'">Pay with Google Pay</a><button class="chip" data-a="upicopy" data-v="'+esc(upis[to])+'">📋 Copy UPI ID</button></div>'};
   const upiCard=()=>{const me=ME(),mine=me&&upis[me]||'';
     return '<div class="card" style="margin-top:16px"><h3>💳 UPI IDs</h3><p class="muted" style="font-size:.82rem;margin-bottom:8px">Add yours so friends can pay you in one tap with PhonePe or Google Pay. Only people with the trip code can see these.</p>'+
