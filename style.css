@@ -127,7 +127,7 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
 .dayh{font:800 1rem "Bricolage Grotesque";background:var(--yellow);color:#111;border:2px solid #111;border-radius:8px;display:inline-block;padding:0 10px;margin:12px 0 4px}
 .exp{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:2px dashed var(--bd)}.ex2{display:flex;align-items:center;gap:8px;white-space:nowrap}
 .x{border:2px solid var(--bd);background:var(--card);color:var(--ink);border-radius:8px;width:28px;height:28px;cursor:pointer;font-weight:800}
-.fab{position:fixed;right:16px;bottom:16px;z-index:30;font:800 1.05rem "Bricolage Grotesque";background:var(--lime);color:#111;border:3px solid var(--bd);border-radius:999px;padding:14px 22px;box-shadow:4px 4px 0 var(--bd);cursor:pointer}
+.fab{position:fixed;right:16px;bottom:max(16px,calc(env(safe-area-inset-bottom) + 8px));z-index:30;display:flex;align-items:center;gap:2px;transition:padding .15s,width .15s;font:800 1.05rem "Bricolage Grotesque";background:var(--lime);color:#111;border:3px solid var(--bd);border-radius:999px;padding:14px 22px;box-shadow:4px 4px 0 var(--bd);cursor:pointer}
 .sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:70;display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--bg);color:var(--ink);width:100%;max-width:520px;max-height:92vh;overflow:auto;border:3px solid var(--bd);border-radius:20px 20px 0 0;padding:16px 16px 22px}
 .sheet .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.sheet .mh b{font:800 1.5rem "Bricolage Grotesque";text-transform:uppercase}
@@ -155,3 +155,6 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
 .appr.wait{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);color:var(--ink)}
 .flash{animation:flash 1.2s 2}@keyframes flash{50%{box-shadow:0 0 0 6px var(--pink)}}
 .chip:disabled{opacity:.35;cursor:not-allowed}
+.fab[hidden]{display:none}.fab .fi{font-size:1.2rem;line-height:1}
+.fab.mini{width:58px;height:58px;padding:0;justify-content:center}.fab.mini .fl{display:none}.fab.mini .fi{font-size:1.8rem}
+.has-fab{padding-bottom:96px}

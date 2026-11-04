@@ -150,7 +150,13 @@ budget(){
     '<p class="lab">Split between <span class="muted" style="font-weight:600">(everyone by default)</span></p><div id="f-split">'+names.map(n=>'<button class="chip on" data-a="sp" data-v="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div>'+
     '<div style="margin:6px 0 12px"><button class="chip" data-a="spall">Everyone</button><button class="chip" data-a="spme">Just the payer</button></div>'+
     '<p id="f-err" class="ferr"></p><button class="btn2" id="f-save" data-a="save">Save expense</button></div></div>'};
+  // Floating "Add expense" button lives outside #app so the 30-second re-render never recreates it mid-scroll (iOS glitch).
+  document.body.insertAdjacentHTML('beforeend','<button class="fab" id="fab" data-a="open" aria-label="Add expense" hidden><span class="fi">＋</span><span class="fl"> Add expense</span></button>');
+  const fab=document.getElementById('fab');
+  const fabMini=()=>fab.classList.toggle('mini',window.innerWidth<700||window.scrollY>160);   // phones: always the round ＋
+  window.addEventListener('scroll',fabMini,{passive:true});window.addEventListener('resize',fabMini);
   const draw=()=>{
+    fab.hidden=!(API&&code);fabMini();
     if(!API){$('#app').innerHTML=head('The Damage 💸','Live expense tracker')+'<section class="wrap"><div class="card"><h3>📲 Live expense logging is coming</h3><p class="muted">Soon everyone will log spends here from their phone and the totals will update for all of us. For now, here is the plan.</p></div>'+preHtml()+'</section>';return}
     if(!code){$('#app').innerHTML=head('The Damage 💸','Everyone logs spends here. Totals update live.')+'<section class="wrap"><div class="card"><h3>🔐 Enter the trip code</h3><p class="muted" style="margin-bottom:10px">Ask Anunay for the code, or open the special link they shared and it will fill in automatically.</p>'+(err?'<p class="ferr">'+esc(err)+'</p>':'')+'<input id="codein" type="password" placeholder="Trip code" autocomplete="off"><button class="btn2" data-a="code">Unlock</button></div>'+preHtml()+'</section>';return}
     const list=all(),{net,paid,share,sett}=calc(list),isPre=e=>/^pre-/.test(e.id||''),spend=list.filter(e=>!isPre(e)),total=spend.reduce((a,e)=>a+e.amount,0);
@@ -158,7 +164,7 @@ budget(){
     const cats={};spend.forEach(e=>cats[e.category]=(cats[e.category]||0)+e.amount);const mx=Math.max(...Object.values(cats),1);
     const groups={};list.forEach(e=>{(groups[day(e.ts)]=groups[day(e.ts)]||[]).push(e)});
     const st=settle(net),sc=err?'⚠️ '+esc(err):'<span class="dot"></span> Live · updated '+(lastOk?tm(lastOk):'now');
-    $('#app').innerHTML=head('The Damage 💸','Log every spend. Totals and balances update for everyone.')+'<section class="wrap">'+
+    $('#app').innerHTML=head('The Damage 💸','Log every spend. Totals and balances update for everyone.')+'<section class="wrap has-fab">'+
     '<div class="livebar">'+sc+'<button class="chip" data-a="refresh">↻ Refresh</button></div>'+pushHtml()+approvals()+
     '<div class="grid"><div class="card"><div class="muted">Spent on the trip</div><div class="big">'+money(total)+'</div><div class="muted" style="font-size:.85rem">'+spend.length+' expense'+(spend.length===1?'':'s')+' logged</div></div>'+
     '<div class="card"><div class="muted">Today</div><div class="big">'+money(todayTotal)+'</div><div class="muted" style="font-size:.85rem">'+esc(today)+'</div></div></div>'+
@@ -171,7 +177,7 @@ budget(){
     '<div class="card" style="margin-top:16px"><h3>🧾 Expenses</h3>'+(list.length?Object.entries(groups).map(([d,es])=>'<div class="dayh">'+esc(d)+' · '+money(es.reduce((a,e)=>a+e.amount,0))+'</div>'+es.map(e=>'<div class="exp"><div class="ex1"><b>'+(catEmoji[e.category]||'✨')+' '+esc(e.note||e.category)+'</b>'+(e.pending?' <span class="tag">⏳ syncing</span>':'')+(isPre(e)?' <span class="tag">pre-trip</span>':'')+'<div class="muted" style="font-size:.8rem">'+esc(e.paid_by)+' paid · '+tm(e.ts)+' · split '+((e.split||[]).length===names.length?'everyone':(e.split||[]).map(esc).join(', '))+'</div></div><div class="ex2"><b>'+money(e.amount)+'</b>'+(e.pending?'':'<button class="x" data-a="del" data-id="'+esc(e.id)+'" aria-label="Delete">✕</button>')+'</div></div>').join('')).join(''):'<p class="muted">Nothing logged yet. Tap <b>＋ Add expense</b> after the first spend.</p>')+'</div>'+
     preHtml(list)+
     '<p style="margin-top:14px"><button class="chip" data-a="invite">🔗 Copy invite link</button> <button class="chip" data-a="csv">⬇️ Download CSV</button> <button class="chip" data-a="lock">🔒 Forget code on this phone</button></p></section>'+
-    settHist()+'<button class="fab" data-a="open">＋ Add expense</button>'};
+    settHist()};
   const stLabel=x=>x.status==='confirmed'?'✅ confirmed':x.status==='rejected'?'❌ not received':'⏳ waiting for '+esc(x.to);
   const approvals=()=>{const me=ME(),pend=setts.filter(x=>x.status==='pending');if(!pend.length)return '';
     return pend.map(x=>{const mine=me===x.to,sent=me===x.from||me===x.created_by;
