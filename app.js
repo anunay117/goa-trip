@@ -150,13 +150,7 @@ budget(){
     '<p class="lab">Split between <span class="muted" style="font-weight:600">(everyone by default)</span></p><div id="f-split">'+names.map(n=>'<button class="chip on" data-a="sp" data-v="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div>'+
     '<div style="margin:6px 0 12px"><button class="chip" data-a="spall">Everyone</button><button class="chip" data-a="spme">Just the payer</button></div>'+
     '<p id="f-err" class="ferr"></p><button class="btn2" id="f-save" data-a="save">Save expense</button></div></div>'};
-  // Floating "Add expense" button lives outside #app so the 30-second re-render never recreates it mid-scroll (iOS glitch).
-  document.body.insertAdjacentHTML('beforeend','<button class="fab" id="fab" data-a="open" aria-label="Add expense" hidden><span class="fi">＋</span><span class="fl"> Add expense</span></button>');
-  const fab=document.getElementById('fab');
-  const fabMini=()=>fab.classList.toggle('mini',window.innerWidth<700||window.scrollY>160);   // phones: always the round ＋
-  window.addEventListener('scroll',fabMini,{passive:true});window.addEventListener('resize',fabMini);
   const draw=()=>{
-    fab.hidden=!(API&&code);fabMini();
     if(!API){$('#app').innerHTML=head('The Damage 💸','Live expense tracker')+'<section class="wrap"><div class="card"><h3>📲 Live expense logging is coming</h3><p class="muted">Soon everyone will log spends here from their phone and the totals will update for all of us. For now, here is the plan.</p></div>'+preHtml()+'</section>';return}
     if(!code){$('#app').innerHTML=head('The Damage 💸','Everyone logs spends here. Totals update live.')+'<section class="wrap"><div class="card"><h3>🔐 Enter the trip code</h3><p class="muted" style="margin-bottom:10px">Ask Anunay for the code, or open the special link they shared and it will fill in automatically.</p>'+(err?'<p class="ferr">'+esc(err)+'</p>':'')+'<input id="codein" type="password" placeholder="Trip code" autocomplete="off"><button class="btn2" data-a="code">Unlock</button></div>'+preHtml()+'</section>';return}
     const list=all(),{net,paid,share,sett}=calc(list),isPre=e=>/^pre-/.test(e.id||''),spend=list.filter(e=>!isPre(e)),total=spend.reduce((a,e)=>a+e.amount,0);
@@ -164,7 +158,7 @@ budget(){
     const cats={};spend.forEach(e=>cats[e.category]=(cats[e.category]||0)+e.amount);const mx=Math.max(...Object.values(cats),1);
     const groups={};list.forEach(e=>{(groups[day(e.ts)]=groups[day(e.ts)]||[]).push(e)});
     const st=settle(net),sc=err?'⚠️ '+esc(err):'<span class="dot"></span> Live · updated '+(lastOk?tm(lastOk):'now');
-    $('#app').innerHTML=head('The Damage 💸','Log every spend. Totals and balances update for everyone.')+'<section class="wrap has-fab">'+
+    $('#app').innerHTML=head('The Damage 💸','Log every spend. Totals and balances update for everyone.')+'<section class="wrap">'+'<div class="addrow"><button class="btn2" data-a="open">＋ Add Expense</button></div>'+
     '<div class="livebar">'+sc+'<button class="chip" data-a="refresh">↻ Refresh</button></div>'+pushHtml()+approvals()+
     '<div class="grid"><div class="card"><div class="muted">Spent on the trip</div><div class="big">'+money(total)+'</div><div class="muted" style="font-size:.85rem">'+spend.length+' expense'+(spend.length===1?'':'s')+' logged</div></div>'+
     '<div class="card"><div class="muted">Today</div><div class="big">'+money(todayTotal)+'</div><div class="muted" style="font-size:.85rem">'+esc(today)+'</div></div></div>'+
