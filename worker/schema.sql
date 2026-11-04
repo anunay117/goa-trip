@@ -34,3 +34,10 @@ CREATE TABLE IF NOT EXISTS settlements (
   decided_at  INTEGER,
   deleted     INTEGER NOT NULL DEFAULT 0
 );
+
+-- Each person's UPI ID, for the PhonePe / Google Pay buttons. Kept behind the trip code (not in the public site code).
+CREATE TABLE IF NOT EXISTS people (
+  name     TEXT PRIMARY KEY,
+  upi      TEXT NOT NULL DEFAULT '',
+  updated  INTEGER NOT NULL
+);

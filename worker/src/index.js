@@ -71,11 +71,12 @@ export default {
     if (!safeEqual(req.headers.get("X-Trip-Code"), env.TRIP_CODE)) return json({ error: "wrong trip code" }, 401, req, env);
 
     if (url.pathname === "/expenses" && req.method === "GET") {
-      const [{ results }, st] = await env.DB.batch([
+      const [{ results }, st, pp] = await env.DB.batch([
         env.DB.prepare("SELECT * FROM expenses WHERE deleted = 0 ORDER BY ts DESC LIMIT ?").bind(MAX_ROWS),
-        env.DB.prepare("SELECT * FROM settlements WHERE deleted = 0 ORDER BY ts DESC LIMIT 500")
+        env.DB.prepare("SELECT * FROM settlements WHERE deleted = 0 ORDER BY ts DESC LIMIT 500"),
+        env.DB.prepare("SELECT name, upi FROM people WHERE upi != ''")
       ]);
-      return json({ now: Date.now(), entries: results.map(row), settlements: st.results.map(srow) }, 200, req, env);
+      return json({ now: Date.now(), entries: results.map(row), settlements: st.results.map(srow), upi: Object.fromEntries(pp.results.map(r => [r.name, r.upi])) }, 200, req, env);
     }
 
     if (url.pathname === "/expenses" && req.method === "POST") {
@@ -123,6 +124,16 @@ export default {
       const st = await sendPush(s, { title: "🔔 Notifications are on", body: "You'll get a ping like this whenever someone logs a Goa trip expense.", tag: "test", url: "budget.html" }, env);
       if (st === 404 || st === 410) await env.DB.prepare("DELETE FROM subs WHERE endpoint = ?").bind(ep).run();
       return json({ ok: st < 300, status: st }, st < 300 ? 200 : 502, req, env);
+    }
+
+    // ---- UPI IDs (each person sets their own) ----
+    if (url.pathname === "/people" && req.method === "POST") {
+      let b; try { b = await req.json(); } catch { return json({ error: "bad json" }, 400, req, env); }
+      if (!NAMES.includes(b.name)) return json({ error: "unknown person" }, 400, req, env);
+      const upi = String(b.upi || "").trim().toLowerCase();
+      if (upi && !/^[a-z0-9._-]{2,64}@[a-z][a-z0-9]{1,31}$/.test(upi)) return json({ error: "that does not look like a UPI ID (name@bank)" }, 400, req, env);
+      await env.DB.prepare("INSERT INTO people (name, upi, updated) VALUES (?, ?, ?) ON CONFLICT(name) DO UPDATE SET upi = excluded.upi, updated = excluded.updated").bind(b.name, upi, Date.now()).run();
+      return json({ ok: true, upi }, 200, req, env);
     }
 
     // ---- Settle up ----

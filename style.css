@@ -131,7 +131,7 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
 .sheet{background:var(--bg);color:var(--ink);width:100%;max-width:520px;max-height:92vh;overflow:auto;border:3px solid var(--bd);border-radius:20px 20px 0 0;padding:16px 16px 22px}
 .sheet .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.sheet .mh b{font:800 1.5rem "Bricolage Grotesque";text-transform:uppercase}
 .sheet .mh button{font:800 1rem sans-serif;border:3px solid var(--bd);background:var(--yellow);color:#111;border-radius:10px;padding:2px 10px;cursor:pointer}
-.sheet .lab{font-weight:800;margin:10px 0 6px}.sheet input[type=text],.sheet input[type=number],#codein{width:100%;font:600 1.1rem "Space Grotesk";padding:10px 12px;border:3px solid var(--bd);border-radius:12px;background:var(--card);color:var(--ink)}
+.sheet .lab{font-weight:800;margin:10px 0 6px}.sheet input[type=text],.sheet input[type=number],#codein,#upi-in{width:100%;font:600 1.1rem "Space Grotesk";padding:10px 12px;border:3px solid var(--bd);border-radius:12px;background:var(--card);color:var(--ink)}
 #codein{margin:6px 0 10px}.sheet .chip{margin-bottom:6px}.ferr{color:#d12b2b;font-weight:700;margin:8px 0}
 .ftabs{display:flex;gap:8px;margin:4px 0 20px}.ftabs .chip{text-decoration:none;font-size:1rem;padding:8px 20px;box-shadow:3px 3px 0 var(--bd)}
 .pbtn.pin{background:#e60023;color:#fff}.pbtn.igb{background:linear-gradient(45deg,#f9a03f,#e1306c,#833ab4);color:#fff}
@@ -155,3 +155,8 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
 .flash{animation:flash 1.2s 2}@keyframes flash{50%{box-shadow:0 0 0 6px var(--pink)}}
 .chip:disabled{opacity:.35;cursor:not-allowed}
 .addrow{display:flex;justify-content:flex-end;margin:-6px 0 12px}.addrow .btn2{margin:0;font-size:1.05rem;padding:10px 20px}
+.paybtns{flex-basis:100%;display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.pay{display:inline-flex;align-items:center;text-decoration:none;font:800 .9rem "Space Grotesk";color:#fff;border:2px solid var(--bd);border-radius:999px;padding:6px 14px;box-shadow:2px 2px 0 var(--bd)}
+.pay.pp{background:#5f259f}.pay.gp{background:#1a73e8}
+.upis{display:flex;flex-wrap:wrap;gap:6px}.upis span{border:2px solid var(--bd);border-radius:999px;padding:2px 10px;font-weight:700;font-size:.85rem;opacity:.55}.upis span.on{opacity:1;background:var(--lime);color:#111}
+.upirow{display:flex;gap:8px;align-items:center}.upirow input{flex:1;min-width:0}.upirow .btn2{margin:0}
