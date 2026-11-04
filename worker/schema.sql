@@ -7,7 +7,10 @@ CREATE TABLE IF NOT EXISTS expenses (
   note      TEXT NOT NULL DEFAULT '',
   split     TEXT NOT NULL,
   added_by  TEXT NOT NULL DEFAULT '',
-  deleted   INTEGER NOT NULL DEFAULT 0
+  deleted   INTEGER NOT NULL DEFAULT 0,
+  delete_reason TEXT NOT NULL DEFAULT '',   -- added by migrations/001-delete-reason.sql on the live database
+  deleted_by    TEXT NOT NULL DEFAULT '',
+  deleted_at    INTEGER
 );
 CREATE INDEX IF NOT EXISTS idx_expenses_ts ON expenses(ts);
 

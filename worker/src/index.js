@@ -71,12 +71,14 @@ export default {
     if (!safeEqual(req.headers.get("X-Trip-Code"), env.TRIP_CODE)) return json({ error: "wrong trip code" }, 401, req, env);
 
     if (url.pathname === "/expenses" && req.method === "GET") {
-      const [{ results }, st, pp] = await env.DB.batch([
+      const [{ results }, st, pp, del] = await env.DB.batch([
         env.DB.prepare("SELECT * FROM expenses WHERE deleted = 0 ORDER BY ts DESC LIMIT ?").bind(MAX_ROWS),
         env.DB.prepare("SELECT * FROM settlements WHERE deleted = 0 ORDER BY ts DESC LIMIT 500"),
-        env.DB.prepare("SELECT name, upi FROM people WHERE upi != ''")
+        env.DB.prepare("SELECT name, upi FROM people WHERE upi != ''"),
+        env.DB.prepare("SELECT * FROM expenses WHERE deleted = 1 ORDER BY COALESCE(deleted_at, ts) DESC LIMIT 50")
       ]);
-      return json({ now: Date.now(), entries: results.map(row), settlements: st.results.map(srow), upi: Object.fromEntries(pp.results.map(r => [r.name, r.upi])) }, 200, req, env);
+      return json({ now: Date.now(), entries: results.map(row), settlements: st.results.map(srow), upi: Object.fromEntries(pp.results.map(r => [r.name, r.upi])),
+        deleted: del.results.map(r => ({ ...row(r), reason: r.delete_reason || "", deleted_by: r.deleted_by || "", deleted_at: r.deleted_at || null })) }, 200, req, env);
     }
 
     if (url.pathname === "/expenses" && req.method === "POST") {
@@ -180,7 +182,17 @@ export default {
     }
 
     const m = url.pathname.match(/^\/expenses\/([\w-]{1,64})$/);
-    if (m && req.method === "DELETE") {
+    // Delete with a reason (the app asks "are you sure?" and why). Soft delete: the row stays in the database.
+    const dm = url.pathname.match(/^\/expenses\/([\w-]{1,64})\/delete$/);
+    if (dm && req.method === "POST") {
+      let b; try { b = await req.json(); } catch { return json({ error: "bad json" }, 400, req, env); }
+      const reason = clean(b.reason, 200);
+      if (reason.length < 3) return json({ error: "please say why you are deleting this" }, 400, req, env);
+      if (!NAMES.includes(b.by)) return json({ error: "tell us who you are" }, 400, req, env);
+      const r = await env.DB.prepare("UPDATE expenses SET deleted = 1, delete_reason = ?, deleted_by = ?, deleted_at = ? WHERE id = ? AND deleted = 0").bind(reason, b.by, Date.now(), dm[1]).run();
+      return json({ ok: true, changed: r.meta ? r.meta.changes : 0 }, 200, req, env);
+    }
+    if (m && req.method === "DELETE") {   // older app versions (no reason)
       await env.DB.prepare("UPDATE expenses SET deleted = 1 WHERE id = ?").bind(m[1]).run();
       return json({ ok: true }, 200, req, env);
     }

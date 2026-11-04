@@ -195,3 +195,7 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
   .dmg .appr h3{font-size:1.05rem}.dmg .appr .btn2{padding:8px 14px;font-size:.95rem}
 }
 .dmg .owe>span:first-child{flex-basis:100%}
+.delbox{background:var(--bg);border:2px dashed var(--bd);border-radius:12px;padding:10px 12px;margin-top:4px}
+#d-why{width:100%;font:600 1rem "Space Grotesk";padding:10px 12px;border:3px solid var(--bd);border-radius:12px;background:var(--card);color:var(--ink);margin-top:8px;resize:vertical}
+.delbtns{display:flex;gap:8px;flex-wrap:wrap}.btn2.danger{background:#d12b2b;color:#fff}
+.delwhy{font-size:.8rem;margin-top:2px;color:var(--ink)}

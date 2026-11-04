@@ -67,6 +67,7 @@ budget(){
   const hm=linkCode();if(hm){ls('goa-code',hm);history.replaceState(null,'',location.pathname+location.search)}
   let code=lg('goa-code')||'',entries=[],queue=[],err='',lastOk=0,me=lg('goa-me')||'',busy=false,modal=false,setts=[],S={};
   try{setts=JSON.parse(lg('goa-setts')||'[]')}catch(e){}
+  let dels=[],DL={};try{dels=JSON.parse(lg('goa-dels')||'[]')}catch(e){}
   let upis={},payPend=null;try{upis=JSON.parse(lg('goa-upi')||'{}')}catch(e){}
   // Who this phone belongs to (shared with the notifications card). Used to show approve buttons to the receiver only.
   const ME=()=>P.name||lg('goa-push-name')||'';
@@ -132,7 +133,7 @@ budget(){
     try{
       for(const q of queue.slice()){const r=await api('/expenses',{method:'POST',body:JSON.stringify(P.ep?{...q,skip:P.ep}:q)});if(r.ok||r.status===400){queue=queue.filter(x=>x.id!==q.id);saveQ()}else if(r.status===401)throw new Error('401')}
       const r=await api('/expenses');if(r.status===401){code='';ls('goa-code','');err='That trip code was not accepted. Ask Anunay for the right one.';busy=false;return draw()}
-      if(!r.ok)throw new Error(r.status);const d=await r.json();entries=d.entries;ls('goa-entries',JSON.stringify(entries));if(Array.isArray(d.settlements)){setts=d.settlements;ls('goa-setts',JSON.stringify(setts))}if(d.upi&&typeof d.upi==='object'){upis=d.upi;ls('goa-upi',JSON.stringify(upis))}lastOk=Date.now();err='';
+      if(!r.ok)throw new Error(r.status);const d=await r.json();entries=d.entries;ls('goa-entries',JSON.stringify(entries));if(Array.isArray(d.settlements)){setts=d.settlements;ls('goa-setts',JSON.stringify(setts))}if(d.upi&&typeof d.upi==='object'){upis=d.upi;ls('goa-upi',JSON.stringify(upis))}if(Array.isArray(d.deleted)){dels=d.deleted;ls('goa-dels',JSON.stringify(dels))}lastOk=Date.now();err='';
     }catch(e){err=navigator.onLine===false||/Failed|fetch|Network/i.test(String(e))?'Offline or weak signal. Showing the last saved list; new entries will sync later.':'Could not reach the server, retrying.'}
     busy=false;if(!modal&&!(document.activeElement&&document.activeElement.id==='upi-in'))draw()};
   let polling=false;
@@ -180,6 +181,7 @@ budget(){
     (setts.length?sec('sett','🤝 Settle-ups',setts.length+' recorded'+(pendN?' · '+pendN+' waiting':''),settHist()):'')+
     sec('push','🔔 Notifications',P.st==='on'?'On'+(P.name?' for '+esc(P.name):''):P.st==='checking'?'Checking…':'Off · tap to set up',pushHtml()||'<p class="muted">Not available in this browser.</p>')+
     sec('upi','💳 UPI IDs',upN+' of '+names.length+' added',upiCard())+
+    (dels.length?sec('del','🗑️ Deleted',dels.length+' deleted',dels.map(e=>'<div class="exp"><div class="ex1"><b>'+(catEmoji[e.category]||'✨')+' '+esc(e.note||e.category)+'</b><div class="muted" style="font-size:.8rem">'+esc(e.paid_by)+' paid · '+esc(day(e.ts))+'</div><div class="delwhy">🗑️ '+(e.deleted_by?esc(e.deleted_by)+': ':'')+(e.reason?'“'+esc(e.reason)+'”':'<i>no reason given</i>')+(e.deleted_at?' · '+esc(day(e.deleted_at))+' '+esc(tm(e.deleted_at)):'')+'</div></div><div class="ex2"><b class="muted" style="text-decoration:line-through">'+money(e.amount)+'</b></div></div>').join('')+'<p class="muted" style="font-size:.8rem;margin-top:8px">Deleted expenses don\'t count in any totals. They stay in the database, so nothing is lost.</p>'):'')+
     sec('more','⚙️ More','Invite link · CSV · forget code','<p><button class="chip" data-a="invite">🔗 Copy invite link</button> <button class="chip" data-a="csv">⬇️ Download CSV</button> <button class="chip" data-a="lock">🔒 Forget code on this phone</button></p>')+
     '</section>'};
   // Collapsible sections remember open/closed per phone, so the 30-second refresh never closes what you opened.
@@ -208,6 +210,26 @@ budget(){
   document.addEventListener('visibilitychange',()=>{if(document.hidden||!payPend)return;const p=payPend;payPend=null;
     if(Date.now()-p.t<1500||Date.now()-p.t>30*60000)return;
     setTimeout(()=>{if(!modal){openSettle(p.from,p.to,p.amount);S.method='UPI';const n=document.getElementById('s-note');if(n)n.value='Paid with '+p.app;reSheet()}},400)});
+  // "Are you sure?" sheet for deleting an expense, with a required reason.
+  const REASONS=['Duplicate entry','Wrong amount','Added by mistake','Not a shared expense'];
+  const delSheet=()=>{const e=entries.find(x=>x.id===DL.id);if(!e)return '';const me=ME();
+    return '<div class="sheetbg" id="sbg"><div class="sheet" role="dialog" aria-label="Delete expense"><div class="mh"><b>🗑️ Delete this expense?</b><button data-a="close">✕</button></div>'+
+    '<div class="delbox"><b>'+money(e.amount)+' · '+esc(e.note||e.category)+'</b><div class="muted" style="font-size:.85rem">'+esc(e.paid_by)+' paid · '+esc(day(e.ts))+' '+esc(tm(e.ts))+' · split '+((e.split||[]).length===names.length?'everyone':(e.split||[]).map(esc).join(', '))+'</div></div>'+
+    '<p style="margin:10px 0 0">Are you sure? It will disappear for <b>everyone</b> and stop counting in the balances.</p>'+
+    (me?'':'<p class="lab">Who are you?</p><div>'+names.map(n=>'<button class="chip" data-a="dme" data-v="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div>')+
+    '<p class="lab">Why are you deleting it? <span class="ferr" style="font-weight:700;margin:0">(required)</span></p><div>'+REASONS.map(r=>'<button class="chip'+(DL.reason===r?' on':'')+'" data-a="dwhy" data-v="'+esc(r)+'">'+esc(r)+'</button>').join('')+'</div>'+
+    '<textarea id="d-why" rows="2" maxlength="200" placeholder="Or type the reason…">'+esc(DL.reason||'')+'</textarea>'+
+    '<p class="ferr">'+esc(DL.err||'')+'</p><div class="delbtns"><button class="btn2 danger" data-a="dyes"'+(DL.busy?' disabled':'')+'>'+(DL.busy?'Deleting…':'🗑️ Yes, delete')+'</button><button class="btn2 alt" data-a="close">Cancel</button></div></div></div>'};
+  const reDel=()=>{const t=document.getElementById('d-why');if(t)DL.reason=t.value;const o=document.getElementById('sbg');if(o)o.outerHTML=delSheet()};
+  const openDel=id=>{DL={id,reason:'',err:''};modal=true;document.body.insertAdjacentHTML('beforeend',delSheet());document.body.style.overflow='hidden'};
+  const doDel=async()=>{reDel();const why=(DL.reason||'').trim(),me=ME();
+    DL.err=!me?'Pick who you are first.':why.length<3?'Please say why you are deleting this expense.':'';if(DL.err)return reDel();
+    DL.busy=true;reDel();
+    try{const r=await api('/expenses/'+encodeURIComponent(DL.id)+'/delete',{method:'POST',body:JSON.stringify({reason:why,by:me})});const d=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(d.error||('server said '+r.status));
+      const e=entries.find(x=>x.id===DL.id);entries=entries.filter(x=>x.id!==DL.id);if(e)dels=[{...e,reason:why,deleted_by:me,deleted_at:Date.now()},...dels];
+      DL.busy=false;close();refresh()}
+    catch(e){DL.busy=false;DL.err=navigator.onLine===false?'You are offline. Try again when you have signal.':'Could not delete: '+(e.message||e);reDel()}};
   const stLabel=x=>x.status==='confirmed'?'✅ confirmed':x.status==='rejected'?'❌ not received':'⏳ waiting for '+esc(x.to);
   const approvals=()=>{const me=ME(),pend=setts.filter(x=>x.status==='pending');if(!pend.length)return '';
     return pend.map(x=>{const mine=me===x.to,sent=me===x.from||me===x.created_by;
@@ -267,7 +289,10 @@ budget(){
       const who=(document.querySelector('#f-who .chip.on')||{dataset:{}}).dataset.v,amt=parseFloat(document.getElementById('f-amt').value),cat=(document.querySelector('#f-cat .chip.on')||{dataset:{}}).dataset.v||'Other',note=document.getElementById('f-note').value.trim(),sp=[...document.querySelectorAll('#f-split .chip.on')].map(c=>c.dataset.v),er=document.getElementById('f-err');
       if(!who){er.textContent='Pick who paid.';return}if(!(amt>0)){er.textContent='Enter an amount.';return}if(!sp.length){er.textContent='Pick at least one person to split with.';return}
       me=who;ls('goa-me',me);queue.push({id:uid(),ts:Date.now(),paid_by:who,amount:Math.round(amt*100)/100,category:cat,note,split:sp,added_by:who});saveQ();close();refresh()}
-    else if(a==='del'){if(confirm('Delete this expense for everyone?')){entries=entries.filter(x=>x.id!==b.dataset.id);draw();try{await api('/expenses/'+encodeURIComponent(b.dataset.id),{method:'DELETE'})}catch(x){}refresh()}}
+    else if(a==='del')openDel(b.dataset.id)
+    else if(a==='dwhy'){DL.reason=b.dataset.v;const t=document.getElementById('d-why');if(t)t.value=DL.reason;reDel()}
+    else if(a==='dme'){setME(b.dataset.v);reDel()}
+    else if(a==='dyes'){if(!DL.busy)doDel()}
     else if(a==='code'){const v=document.getElementById('codein').value.trim();if(v){code=v;ls('goa-code',v);err='';draw();poll();refresh()}}
     else if(a==='invite')invite()
     else if(a==='pn'){P.name=b.dataset.v;P.msg='';draw()}
