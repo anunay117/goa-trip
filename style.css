@@ -161,3 +161,37 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
 .upis{display:flex;flex-wrap:wrap;gap:6px}.upis span{border:2px solid var(--bd);border-radius:999px;padding:2px 10px;font-weight:700;font-size:.85rem;opacity:.55}.upis span.on{opacity:1;background:var(--lime);color:#111}
 .upirow{display:flex;gap:8px;align-items:center}.upirow input{flex:1;min-width:0}.upirow .btn2{margin:0}
 .payhint{flex-basis:100%;font-size:.8rem;color:var(--muted)}
+/* ---- The Damage: decluttered, mobile-first ---- */
+.dmg .topbar{display:flex;align-items:center;gap:8px;margin:0 0 14px}.dmg .topbar .live{flex:1;min-width:0;font-size:.82rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dmg .topbar .btn2{margin:0;padding:9px 16px;font-size:1rem;white-space:nowrap}.dmg .chip.ico{margin:0;padding:6px 12px;font-size:1rem}
+.dmg .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:14px}
+.dmg .tile2{background:var(--card);border:3px solid var(--bd);border-radius:16px;padding:10px 12px;box-shadow:4px 4px 0 var(--bd);display:flex;flex-direction:column;min-width:0}
+.dmg .tile2 span{font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dmg .tile2 b{font:800 1.45rem "Bricolage Grotesque";line-height:1.2;margin:2px 0}.dmg .tile2 small{font-size:.75rem;color:var(--muted)}
+.dmg .tile2.pos b{color:#1a8f3c}.dmg .tile2.neg b{color:#d12b2b}
+.dmg .card{margin-bottom:12px}.dmg .exps h3{margin-bottom:4px}
+.dmg .sec{padding:0;overflow:hidden}
+.dmg .sec>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none}
+.dmg .sec>summary::-webkit-details-marker{display:none}
+.dmg .sec>summary .st{font:800 1.05rem "Bricolage Grotesque";white-space:nowrap}
+.dmg .sec>summary .ss{flex:1;text-align:right;font-size:.82rem;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dmg .sec>summary::after{content:"▾";font-size:1rem;transition:transform .15s}.dmg .sec[open]>summary::after{transform:rotate(180deg)}
+.dmg .sec[open]>summary{border-bottom:2px dashed var(--bd)}
+.dmg .sec>.sb{padding:12px 16px 16px}
+.dmg .sb>.card{border:0;box-shadow:none;padding:0;margin:0;background:none;color:inherit}.dmg .sb>.card>h3:first-child{display:none}
+.dmg .sb .pcard.on{background:none;padding:0}
+.dmg .exp{padding:10px 0}.dmg .dayh{margin-top:10px}
+@media(max-width:560px){
+  body[data-page="budget"] .ph{padding-top:22px;padding-bottom:8px}
+  body[data-page="budget"] .ph h1{font-size:2.3rem}
+  body[data-page="budget"] .ph p{font-size:.85rem;margin-top:8px;padding:3px 10px}
+  .dmg .card{padding:14px;border-radius:16px;box-shadow:4px 4px 0 var(--bd)}
+  .dmg .sec{padding:0}
+  .dmg .tiles{gap:8px}.dmg .tile2{padding:8px 10px}.dmg .tile2 b{font-size:1.15rem}
+  .dmg .exp .ex1 b{font-size:.95rem}.dmg .exp .ex2 b{font-size:1rem;white-space:nowrap}
+  .dmg .owe{font-size:.95rem}.dmg .bal{font-size:.95rem}
+  .dmg .big{font-size:1.9rem}
+  .dmg .chip{padding:6px 12px;font-size:.85rem;margin-bottom:4px}
+  .dmg .appr h3{font-size:1.05rem}.dmg .appr .btn2{padding:8px 14px;font-size:.95rem}
+}
+.dmg .owe>span:first-child{flex-basis:100%}

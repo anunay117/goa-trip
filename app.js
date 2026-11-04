@@ -158,21 +158,35 @@ budget(){
     const today=day(Date.now()),todayTotal=spend.filter(e=>day(e.ts)===today).reduce((a,e)=>a+e.amount,0);
     const cats={};spend.forEach(e=>cats[e.category]=(cats[e.category]||0)+e.amount);const mx=Math.max(...Object.values(cats),1);
     const groups={};list.forEach(e=>{(groups[day(e.ts)]=groups[day(e.ts)]||[]).push(e)});
-    const st=settle(net),sc=err?'⚠️ '+esc(err):'<span class="dot"></span> Live · updated '+(lastOk?tm(lastOk):'now');
-    $('#app').innerHTML=head('The Damage 💸','Log every spend. Totals and balances update for everyone.')+'<section class="wrap">'+'<div class="addrow"><button class="btn2" data-a="open">＋ Add Expense</button></div>'+
-    '<div class="livebar">'+sc+'<button class="chip" data-a="refresh">↻ Refresh</button></div>'+pushHtml()+approvals()+
-    '<div class="grid"><div class="card"><div class="muted">Spent on the trip</div><div class="big">'+money(total)+'</div><div class="muted" style="font-size:.85rem">'+spend.length+' expense'+(spend.length===1?'':'s')+' logged</div></div>'+
-    '<div class="card"><div class="muted">Today</div><div class="big">'+money(todayTotal)+'</div><div class="muted" style="font-size:.85rem">'+esc(today)+'</div></div></div>'+
-    '<div class="card" style="margin-top:16px"><h3>👥 Everyone\'s balance</h3><p class="muted" style="font-size:.82rem;margin-bottom:6px">Share = what each person owes of the logged spends. Net = paid minus share.</p>'+
-    names.map(n=>{const v=Math.round(net[n]);return '<div class="bal"><b>'+esc(n)+'</b><span class="muted">paid '+money(paid[n])+' · share '+money(share[n])+(Math.round(sett[n])?' · settled '+(sett[n]>0?'+':'−')+money(Math.abs(sett[n])):'')+'</span><b class="'+(v>0?'pos':v<0?'neg':'')+'">'+(v>0?'gets back '+money(v):v<0?'owes '+money(-v):'all square')+'</b></div>'}).join('')+
-    '<h4 style="margin:14px 0 4px">💸 Who pays whom</h4>'+(st.length?st.map(s=>{const pend=setts.find(x=>x.status==='pending'&&x.from===s[0]&&x.to===s[1]);
-      return '<div class="owe"><span><b>'+esc(s[0])+'</b> pays <b>'+esc(s[1])+'</b> '+money(s[2])+'</span>'+(pend?'<span class="tag">⏳ '+money(pend.amount)+' waiting for '+esc(s[1])+'</span>':'<button class="chip on" data-a="stl" data-f="'+esc(s[0])+'" data-t="'+esc(s[1])+'" data-m="'+Math.round(s[2])+'">🤝 Settle up</button>')+(pend?'':payBtns(s[0],s[1],s[2]))+'</div>'}).join(''):'<p class="muted">Everyone is all square 🎉</p>')+
-    '<p style="margin-top:8px"><button class="chip" data-a="stl">＋ Record another payment</button></p></div>'+
-    (Object.keys(cats).length?'<div class="card" style="margin-top:16px"><h3>By category</h3>'+Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<div style="margin:10px 0"><div style="display:flex;justify-content:space-between"><span>'+(catEmoji[k]||'')+' '+esc(k)+'</span><b>'+money(v)+'</b></div><div class="bar"><i style="width:'+v/mx*100+'%"></i></div></div>').join('')+'</div>':'')+
-    '<div class="card" style="margin-top:16px"><h3>🧾 Expenses</h3>'+(list.length?Object.entries(groups).map(([d,es])=>'<div class="dayh">'+esc(d)+' · '+money(es.reduce((a,e)=>a+e.amount,0))+'</div>'+es.map(e=>'<div class="exp"><div class="ex1"><b>'+(catEmoji[e.category]||'✨')+' '+esc(e.note||e.category)+'</b>'+(e.pending?' <span class="tag">⏳ syncing</span>':'')+(isPre(e)?' <span class="tag">pre-trip</span>':'')+'<div class="muted" style="font-size:.8rem">'+esc(e.paid_by)+' paid · '+tm(e.ts)+' · split '+((e.split||[]).length===names.length?'everyone':(e.split||[]).map(esc).join(', '))+'</div></div><div class="ex2"><b>'+money(e.amount)+'</b>'+(e.pending?'':'<button class="x" data-a="del" data-id="'+esc(e.id)+'" aria-label="Delete">✕</button>')+'</div></div>').join('')).join(''):'<p class="muted">Nothing logged yet. Tap <b>＋ Add expense</b> after the first spend.</p>')+'</div>'+
-    preHtml(list)+
-    '<p style="margin-top:14px"><button class="chip" data-a="invite">🔗 Copy invite link</button> <button class="chip" data-a="csv">⬇️ Download CSV</button> <button class="chip" data-a="lock">🔒 Forget code on this phone</button></p></section>'+
-    settHist()+upiCard()};
+    const st=settle(net),sc=err?'⚠️ '+esc(err):'<span class="dot"></span> Live · '+(lastOk?tm(lastOk):'now');
+    const meN=ME(),myNet=meN?Math.round(net[meN]):null,grand=[...pre,...(TRIP.upcoming||[])].reduce((x,y)=>x+y.amount,0);
+    const shown=SHOWALL?list:list.slice(0,8),groupsShown={};shown.forEach(e=>{(groupsShown[day(e.ts)]=groupsShown[day(e.ts)]||[]).push(e)});
+    const ph=preHtml(list).replace('<div class="card" style="margin-top:16px"><h3>📊 Budget estimate</h3>','').replace(/<\/div>$/,'');
+    const pendN=setts.filter(x=>x.status==='pending').length,upN=names.filter(n=>upis[n]).length;
+    $('#app').innerHTML=head('The Damage 💸','Log spends. Settle up. Stay friends.')+'<section class="wrap dmg">'+
+    '<div class="topbar"><span class="live">'+sc+'</span><button class="chip ico" data-a="refresh" aria-label="Refresh">↻</button><button class="btn2" data-a="open">＋ Add Expense</button></div>'+
+    approvals()+
+    '<div class="tiles"><div class="tile2"><span>Spent</span><b>'+money(total)+'</b><small>'+spend.length+' expense'+(spend.length===1?'':'s')+'</small></div>'+
+      '<div class="tile2"><span>Today</span><b>'+money(todayTotal)+'</b><small>'+esc(today)+'</small></div>'+
+      (meN?'<div class="tile2 '+(myNet>0?'pos':myNet<0?'neg':'')+'"><span>You ('+esc(meN)+')</span><b>'+(myNet>0?'+'+money(myNet):myNet<0?'−'+money(-myNet):'₹0')+'</b><small>'+(myNet>0?'you get back':myNet<0?'you owe':'all square')+'</small></div>':'')+'</div>'+
+    '<div class="card exps"><h3>🧾 Expenses</h3>'+(list.length?Object.entries(groupsShown).map(([d,es])=>'<div class="dayh">'+esc(d)+' · '+money(es.filter(e=>!isPre(e)).reduce((a,e)=>a+e.amount,0))+'</div>'+es.map(e=>'<div class="exp"><div class="ex1"><b>'+(catEmoji[e.category]||'✨')+' '+esc(e.note||e.category)+'</b>'+(e.pending?' <span class="tag">⏳ syncing</span>':'')+(isPre(e)?' <span class="tag">pre-trip</span>':'')+'<div class="muted" style="font-size:.8rem">'+esc(e.paid_by)+' paid · '+tm(e.ts)+' · split '+((e.split||[]).length===names.length?'everyone':(e.split||[]).map(esc).join(', '))+'</div></div><div class="ex2"><b>'+money(e.amount)+'</b>'+(e.pending?'':'<button class="x" data-a="del" data-id="'+esc(e.id)+'" aria-label="Delete">✕</button>')+'</div></div>').join('')).join(''):'<p class="muted">Nothing logged yet. Tap <b>＋ Add expense</b> after the first spend.</p>')+(list.length>8?'<button class="chip" data-a="showall" style="margin-top:10px">'+(SHOWALL?'Show fewer':'Show all '+list.length)+'</button>':'')+'</div>'+
+    sec('bal','👥 Everyone\'s balance',meN?(myNet>0?'You get back '+money(myNet):myNet<0?'You owe '+money(-myNet):'You are all square'):'Tap to see',
+      '<p class="muted" style="font-size:.8rem;margin-bottom:4px">Paid minus your share of the spends, plus confirmed settle-ups.</p>'+names.map(n=>{const v=Math.round(net[n]);return '<div class="bal"><b>'+esc(n)+'</b><span class="muted">paid '+money(paid[n])+' · share '+money(share[n])+(Math.round(sett[n])?' · settled '+(sett[n]>0?'+':'−')+money(Math.abs(sett[n])):'')+'</span><b class="'+(v>0?'pos':v<0?'neg':'')+'">'+(v>0?'gets back '+money(v):v<0?'owes '+money(-v):'all square')+'</b></div>'}).join(''))+
+    sec('who','💸 Who pays whom',st.length?st.length+' payment'+(st.length===1?'':'s')+' to settle':'All square 🎉',
+      (st.length?st.map(s=>{const pend=setts.find(x=>x.status==='pending'&&x.from===s[0]&&x.to===s[1]);
+      return '<div class="owe"><span><b>'+esc(s[0])+'</b> pays <b>'+esc(s[1])+'</b> '+money(s[2])+'</span>'+(pend?'<span class="tag">⏳ '+money(pend.amount)+' waiting for '+esc(s[1])+'</span>':'<button class="chip on" data-a="stl" data-f="'+esc(s[0])+'" data-t="'+esc(s[1])+'" data-m="'+Math.round(s[2])+'">🤝 Settle up</button>')+(pend?'':payBtns(s[0],s[1],s[2]))+'</div>'}).join(''):'<p class="muted">Everyone is all square 🎉</p>')+'<p style="margin-top:8px"><button class="chip" data-a="stl">＋ Record another payment</button></p>')+
+    (Object.keys(cats).length?sec('cats','📂 By category',Object.keys(cats).length+' categor'+(Object.keys(cats).length===1?'y':'ies'),Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<div style="margin:10px 0"><div style="display:flex;justify-content:space-between"><span>'+(catEmoji[k]||'')+' '+esc(k)+'</span><b>'+money(v)+'</b></div><div class="bar"><i style="width:'+v/mx*100+'%"></i></div></div>').join('')):'')+
+    (ph?sec('budget','📊 Budget estimate',money(grand)+' est.',ph):'')+
+    (setts.length?sec('sett','🤝 Settle-ups',setts.length+' recorded'+(pendN?' · '+pendN+' waiting':''),settHist()):'')+
+    sec('push','🔔 Notifications',P.st==='on'?'On'+(P.name?' for '+esc(P.name):''):P.st==='checking'?'Checking…':'Off · tap to set up',pushHtml()||'<p class="muted">Not available in this browser.</p>')+
+    sec('upi','💳 UPI IDs',upN+' of '+names.length+' added',upiCard())+
+    sec('more','⚙️ More','Invite link · CSV · forget code','<p><button class="chip" data-a="invite">🔗 Copy invite link</button> <button class="chip" data-a="csv">⬇️ Download CSV</button> <button class="chip" data-a="lock">🔒 Forget code on this phone</button></p>')+
+    '</section>'};
+  // Collapsible sections remember open/closed per phone, so the 30-second refresh never closes what you opened.
+  let OPEN=new Set();try{OPEN=new Set(JSON.parse(lg('goa-open')||'[]'))}catch(e){}
+  let SHOWALL=false;
+  const sec=(k,title,sub,body)=>'<details class="card sec" data-k="'+k+'"'+(OPEN.has(k)?' open':'')+'><summary><span class="st">'+title+'</span><span class="ss">'+sub+'</span></summary><div class="sb">'+body+'</div></details>';
+  document.addEventListener('toggle',e=>{const d=e.target;if(!d.matches||!d.matches('details.sec'))return;d.open?OPEN.add(d.dataset.k):OPEN.delete(d.dataset.k);ls('goa-open',JSON.stringify([...OPEN]))},true);
   // UPI deep links: PhonePe and Google Pay open with the receiver's UPI ID, amount and note filled in.
   const upiQ=(to,amt)=>'pa='+encodeURIComponent(upis[to]).replace(/%40/g,'@')+'&pn='+encodeURIComponent(to)+'&am='+(Math.round(amt*100)/100).toFixed(2)+'&cu=INR&tn='+encodeURIComponent('Goa trip settle up');
   const payBtns=(from,to,amt)=>{const me=ME();if(me&&me===to)return '<div class="payhint">'+(upis[to]?'💳 '+esc(from)+' sees <b>Pay with PhonePe / Google Pay</b> here on their phone.':'💳 Add your UPI ID below so '+esc(from)+' can pay you in one tap.')+'</div>';if(!upis[to]||(me&&me!==from))return '';/* only on your own debts */const d=' data-f="'+esc(from)+'" data-t="'+esc(to)+'" data-m="'+Math.round(amt)+'"';
@@ -263,6 +277,7 @@ budget(){
     else if(a==='lock'){if(confirm('Forget the trip code on this phone?')){code='';ls('goa-code','');entries=[];ls('goa-entries','[]');draw()}}
     else if(a==='refresh')refresh();else if(a==='csv')csv()
     else if(a==='stl')openSettle(b.dataset.f,b.dataset.t,b.dataset.m)
+    else if(a==='showall'){SHOWALL=!SHOWALL;draw()}
     else if(a==='upi'){payPend={from:b.dataset.f,to:b.dataset.t,amount:b.dataset.m,app:b.dataset.app,t:Date.now()}}
     else if(a==='upicopy'){const v=b.dataset.v;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>{b.textContent='✅ Copied '+v}).catch(()=>prompt('UPI ID:',v))}
     else if(a==='upime'){setME(b.dataset.v);draw()}
@@ -280,7 +295,7 @@ budget(){
   if(API&&code){poll();refresh()}
   checkPush().then(()=>{if(!modal&&code)draw()});
   let jump=(location.hash.match(/s=([\w-]{1,64})/)||[])[1];
-  const doJump=()=>{if(!jump)return;const el=document.getElementById('st-'+jump)||document.getElementById('sh-'+jump);if(el){el.scrollIntoView({block:'center'});el.classList.add('flash');jump=''}};
+  const doJump=()=>{if(!jump)return;const el=document.getElementById('st-'+jump)||document.getElementById('sh-'+jump);if(el){const dd=el.closest('details');if(dd&&!dd.open)dd.open=true;el.scrollIntoView({block:'center'});el.classList.add('flash');jump=''}};
   setInterval(doJump,700);window.addEventListener('hashchange',()=>{const m=location.hash.match(/s=([\w-]{1,64})/);if(m){jump=m[1];refresh()}});
 },
 outfits(){
