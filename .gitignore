@@ -1,0 +1,12 @@
+# Cloudflare Worker local files (never commit secrets)
+worker/.dev.vars
+worker/.wrangler/
+.wrangler/
+node_modules/
+.DS_Store
+
+# Site password and plaintext trip details stay on this Mac only
+.site-pass
+data.js
+# Expense server code is deployed from this Mac with wrangler, not published
+worker/
