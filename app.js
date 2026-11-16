@@ -178,7 +178,7 @@ budget(){
       {k:'more',i:'⚙️',t:'Invite & export',s:'Invite link · CSV · forget code',b:'<p><button class="chip" data-a="invite">🔗 Copy invite link</button> <button class="chip" data-a="csv">⬇️ Download CSV</button> <button class="chip" data-a="lock">🔒 Forget code on this phone</button></p>'}
     ].filter(Boolean);
     $('#app').innerHTML=head('The Damage 💸','Log spends. Settle up. Stay friends.')+'<section class="wrap dmg">'+
-    '<div class="topbar"><button class="live" data-a="refresh" title="'+scT+'">'+sc+'</button><button class="chip ico mbtn" data-a="menu" aria-label="Options">⚙️ Options</button><button class="btn2" data-a="open">＋ Add Expense</button></div>'+
+    '<div class="topbar"><button class="live" data-a="refresh" title="'+scT+'">'+sc+'</button><button class="chip ico optbtn" data-a="menu" aria-label="Options">⚙️ Options</button><button class="btn2" data-a="open">＋ Add Expense</button></div>'+
     approvals()+
     '<div class="tiles"><div class="tile2"><span>Spent</span><b>'+money(total)+'</b><small>'+spend.length+' expense'+(spend.length===1?'':'s')+'</small></div>'+
       '<div class="tile2"><span>Today</span><b>'+money(todayTotal)+'</b><small>'+esc(today)+'</small></div>'+

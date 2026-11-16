@@ -200,7 +200,7 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
 .delbtns{display:flex;gap:8px;flex-wrap:wrap}.btn2.danger{background:#d12b2b;color:#fff}
 .delwhy{font-size:.8rem;margin-top:2px;color:var(--ink)}
 /* The Damage: ⚙️ Options sheet (balances, budget, notifications, UPI, deleted, export) */
-.dmg .topbar .mbtn{font-weight:800;background:var(--yellow);color:#111;white-space:nowrap}
+.dmg .topbar .optbtn{font-weight:800;background:var(--yellow);color:#111;white-space:nowrap}
 .msheet .mh{gap:8px}.msheet .mh b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1.25rem}
 .msheet .mback{font:800 .95rem "Bricolage Grotesque";border:3px solid var(--bd);background:var(--card);color:var(--ink);border-radius:10px;padding:4px 10px;cursor:pointer;white-space:nowrap}
 .mlist{display:flex;flex-direction:column;gap:10px;margin-top:10px}
@@ -215,7 +215,7 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
 .mpanel.dmg>.card{border:0;box-shadow:none;padding:0;margin:0;background:none;color:inherit}
 .mpanel.dmg>.card>h3:first-child{display:none}
 .mpanel .pcard.on{background:none;padding:0}
-@media(max-width:400px){.dmg .topbar{gap:6px}.dmg .topbar .btn2{padding:9px 12px;font-size:.95rem}.dmg .topbar .mbtn{padding:6px 10px}}
+@media(max-width:400px){.dmg .topbar{gap:6px}.dmg .topbar .btn2{padding:9px 12px;font-size:.95rem}.dmg .topbar .optbtn{padding:6px 10px}}
 .dmg .topbar button.live{background:none;border:0;padding:0;font:inherit;font-size:.82rem;font-weight:600;color:var(--muted);cursor:pointer;text-align:left}
 /* Site password gate (gate.js) */
 .gate{min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;padding-top:24px;padding-bottom:24px}
