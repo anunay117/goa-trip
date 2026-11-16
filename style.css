@@ -228,3 +228,15 @@ nav .wrap{max-width:1240px}nav a.l{padding:6px 12px}
 .gate #gate-pw:focus{outline:none;box-shadow:4px 4px 0 var(--violet,#7c3aed)}
 .gate .btn2{margin:0;width:100%;font-size:1.15rem;padding:12px}
 .gate .ferr{min-height:1.2em}
+/* Core Memories: shared Google Photos album */
+.mem .albc{text-align:center;padding:28px 20px;background:var(--cyan);color:#111}
+.mem .albc .albic{font-size:3rem;line-height:1}
+.mem .albc h2{font:800 1.9rem "Bricolage Grotesque";text-transform:uppercase;margin:8px 0 6px}
+.mem .albc .muted{color:#1d1d24;max-width:460px;margin:0 auto}
+.mem .albbtns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}
+.mem .albbtns .btn2{margin:0;text-decoration:none;font-size:1.1rem;padding:12px 20px}
+.mem .btn2.off{opacity:.6;cursor:default;background:#fff}
+.mem .ostabs{display:flex;gap:8px;margin:8px 0 6px}.mem .ostabs .chip{font-size:.95rem;padding:6px 16px}
+.mem ol.steps{margin:10px 0 0 22px;display:grid;gap:8px}
+.mem ul.tips{margin:6px 0 0 20px;display:grid;gap:6px}
+.mem .card{margin-bottom:18px}

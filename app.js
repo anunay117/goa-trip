@@ -591,9 +591,30 @@ games(){
 },
 
 gallery(){
-  const P=TRIP.photos;
-  $('#app').innerHTML=head('Core Memories 📸','Receipts for the group chat.')+'<section class="wrap">'+(P.length?'<div class="pics">'+P.map(p=>'<figure data-s="'+esc(p.src)+'"><img loading="lazy" src="'+esc(p.src)+'" alt="'+esc(p.caption)+'"><figcaption>'+esc(p.caption)+'</figcaption></figure>').join('')+'</div>':'<div class="card" style="text-align:center"><div class="ph0">📸</div><h3>Camera roll is empty (for now)</h3><p class="muted">Copy your pictures into the <code>photos/</code> folder and list them in <code>data.js</code> under <code>photos</code>.</p></div>')+'</section><div id="lb"><img alt=""></div>';
-  const lb=$('#lb');document.querySelectorAll('.pics figure').forEach(f=>f.onclick=()=>{lb.querySelector('img').src=f.dataset.s;lb.classList.add('on')});lb.onclick=()=>lb.classList.remove('on');
+  const P=TRIP.photos||[],A=TRIP.album||{},url=A.url||'',lg=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+  let os=lg('goa-os')||(/android/i.test(navigator.userAgent)?'android':'iphone');
+  const steps={
+    iphone:['Install <b>Google Photos</b> from the App Store and sign in with your own Gmail.','Tap <b>Open the album</b> above. It opens in Google Photos: tap <b>Join</b>.','In the album, tap the <b>Add photos</b> button (picture with a ＋), pick your photos and videos, then tap <b>Done</b>.','If Google Photos asks to turn on <b>Backup</b>, you can say <b>No</b>. Only the photos you pick go to the album.'],
+    android:['Open <b>Google Photos</b> (already on most Android phones) and check you are signed in with your own Gmail.','Tap <b>Open the album</b> above, then tap <b>Join</b>.','Tap the <b>Add photos</b> button (picture with a ＋), select your photos and videos, then tap <b>Add</b>.','Shortcut: in Google Photos select photos → <b>＋ / Add to</b> → <b>Shared album</b> → <b>'+esc(A.name||'the trip album')+'</b>.']};
+  const draw=()=>{
+    $('#app').innerHTML=head('Core Memories 📸','Receipts for the group chat.')+'<section class="wrap mem">'+
+    '<div class="card albc"><div class="albic">📸</div><h2>'+esc(A.name||'Our Goa album')+'</h2>'+
+      (url?'<p class="muted">Every pic from the trip, in one shared Google Photos album. Open it, add yours, relive it.</p><div class="albbtns"><a class="btn2" href="'+esc(url)+'" target="_blank" rel="noopener">📸 Open the album</a><a class="btn2 alt" href="#add" data-os-jump>➕ Add your photos</a></div>'
+          :'<p class="muted">The shared Google Photos album is being set up. The link will appear right here soon.</p><div class="albbtns"><span class="btn2 off">📸 Album coming soon</span></div>')+'</div>'+
+    '<div class="card" id="add"><h3>➕ How to add your photos</h3><div class="ostabs">'+[['iphone','📱 iPhone'],['android','🤖 Android']].map(([k,l])=>'<button class="chip'+(os===k?' on':'')+'" data-os="'+k+'">'+l+'</button>').join('')+'</div>'+
+      '<ol class="steps">'+steps[os].map(t=>'<li>'+t+'</li>').join('')+'</ol></div>'+
+    '<div class="card"><h3>💡 Good to know</h3><ul class="tips">'+
+      '<li>Your photos use <b>your own</b> Google storage (15 GB free), not anyone else\'s. Photos are small; long 4K videos fill it fastest.</li>'+
+      '<li>Add pics each night so nobody has to chase them after the trip.</li>'+
+      '<li>Want everything at the end? In the album tap <b>⋮</b> → <b>Download all</b>.</li>'+
+      '<li>Only the crew sees this link: it lives behind the site password.</li></ul></div>'+
+    (P.length?'<div class="pics">'+P.map(p=>'<figure data-s="'+esc(p.src)+'"><img loading="lazy" src="'+esc(p.src)+'" alt="'+esc(p.caption)+'"><figcaption>'+esc(p.caption)+'</figcaption></figure>').join('')+'</div>':'')+
+    '</section><div id="lb"><img alt=""></div>';
+    document.querySelectorAll('[data-os]').forEach(b=>b.onclick=()=>{os=b.dataset.os;try{localStorage.setItem('goa-os',os)}catch(e){}draw();document.getElementById('add').scrollIntoView({block:'start'})});
+    const j=document.querySelector('[data-os-jump]');if(j)j.onclick=e=>{e.preventDefault();document.getElementById('add').scrollIntoView({behavior:'smooth',block:'start'})};
+    const lb=$('#lb');document.querySelectorAll('.pics figure').forEach(f=>f.onclick=()=>{lb.querySelector('img').src=f.dataset.s;lb.classList.add('on')});lb.onclick=()=>lb.classList.remove('on');
+  };
+  draw();
 }};
 R[page]();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
