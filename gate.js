@@ -10,6 +10,9 @@
   var b64 = function (s) { return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0) }) };
   var toB64 = function (buf) { return btoa(String.fromCharCode.apply(null, new Uint8Array(buf))) };
   var enc = new TextEncoder(), dec = new TextDecoder();
+  // Change RESET to make every phone forget the saved password and ask for it again once.
+  var RESET = '2026-11-16';
+  if (lg('goa-gate') !== RESET) { ls('goa-code', null); ls('goa-key', null); }
 
   // After the trip details, start the site itself. (Pages load their other scripts, e.g. words.js, before this one.)
   var extra = ['app.js'];
@@ -47,7 +50,7 @@
     if (!pw) return Promise.reject(new Error('empty'));
     return keyFor(pw)
       .then(function (key) { return crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(E.iv) }, key, b64(E.ct)) })
-      .then(function (buf) { ls('goa-code', pw); return dec.decode(buf) })
+      .then(function (buf) { ls('goa-code', pw); ls('goa-gate', RESET); return dec.decode(buf) })
       .catch(function (e) { ls('goa-key', null); throw e });
   }
 
